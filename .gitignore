@@ -1,24 +1,58 @@
+# ====================
+# Node / Vite React
+# ====================
+
+# dependencies
+/node_modules
+
+# builds
+/dist
+/build
+
+# environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# IDE files
+.vscode/
+.idea/
+
 # Logs
-logs
-*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
+logs
+*.log
 
-node_modules
-dist
-dist-ssr
-*.local
+# Cache
+.git/
+.cache/
+temp/
+*.tmp
+*.swp
+*.lock
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# system files
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+
+# Editor backups
+*~
+*.bak
+
+# Local artifacts
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Testing output
+coverage
+/*.tgz
+
+# Misc
+*.local
+*.orig
