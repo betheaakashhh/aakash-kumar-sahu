@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+/* stylelint-disable at-rule-no-unknown */
+
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: outfit, sans-serif;
+
+}
+body{
+  font-family: 'Poppins', sans-serif;
+  min-height: 100vh;
+  background: #080808;
+  color: #333;
+  overflow-x: hidden;
+
+}
+a{
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+}
+.app{
+  width: 100%;
+  height: 100vh;
+  margin: 0 auto;
+
+}
+.container{
+  padding-right: 10%;
+  padding-left: 10%;
+  margin: 0 auto;
+}
+
+.dark-mode{
+  background: #121212;
+  color: #f5f5f5;
+}
+
+body {
+  scrollbar-gutter: stable both-edges;
+  overflow-y: overlay;
+}
+::-webkit-scrollbar {
+  display: none; /* hides by default */
+}
+body:hover::-webkit-scrollbar {
+  display: block; /* shows on hover */
+}
+::-webkit-scrollbar {
+  width: 8px;
+}

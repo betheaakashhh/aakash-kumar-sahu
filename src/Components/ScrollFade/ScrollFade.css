@@ -1,0 +1,37 @@
+.fade-section {
+  opacity: 0.5;
+
+  filter: blur(5px);
+  transition: all 0.8s ease-out;
+}
+
+
+.fade-section.visible {
+  opacity: 1;
+   
+  filter: blur(0);
+}
+.fade-section.delay-1 {
+  transition-delay: 0.2s;
+}
+.fade-section.delay-2 {
+  transition-delay: 0.4s;
+}
+.fade-section.delay-3 {
+  transition-delay: 0.6s;
+}
+.fade-section.delay-4 {
+  transition-delay: 0.8s;
+}
+.fade-section.delay-5 {
+  transition-delay: 1s;
+}
+.fade-section.delay-6 {
+  transition-delay: 1.2s;
+}
+.fade-section.delay-7 {
+  transition-delay: 1.4s;
+}
+.fade-section.delay-8 {
+  transition-delay: 1.6s;
+}
