@@ -36,7 +36,13 @@ const AdminDashboard = () => {
     note: "",
   });
 
-  const API_URL = "http://localhost:5000";
+  // Fixed API_URL - remove /api/auth from the base URL
+ const API_URL = import.meta.env.VITE_API_URL ||'http://localhost:5000';
+ console.log('🔧 API Configuration:', {
+  base: API_URL,
+  
+});
+
 
   useEffect(() => {
     fetchAdminProfile();
