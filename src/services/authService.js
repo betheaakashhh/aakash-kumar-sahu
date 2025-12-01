@@ -3,6 +3,11 @@
 const API_BASE_URL = import.meta.env.VITE_BASE_URL ||'http://localhost:5000';
 
 const API_URL = `${API_BASE_URL}/api/auth`;
+console.log('🌐 API Configuration:', {
+  VITE_BASE_URL: import.meta.env.VITE_BASE_URL,
+  API_BASE_URL,
+  API_URL
+});
 
 
 export const authService = {
