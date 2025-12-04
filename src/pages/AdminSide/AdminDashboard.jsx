@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./admin.css";
+import ResumeManager from "../../Components/Resume/ResumeManager";
 
 const AdminDashboard = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
@@ -1420,6 +1421,8 @@ const AdminDashboard = () => {
             </div>
           </div>
         );
+        case "resume" :
+           return <ResumeManager />
 
       default:
         return null;
@@ -1459,7 +1462,9 @@ const AdminDashboard = () => {
           </button>
 
           <button
-            className={`admin-a-s-menu-item ${activeMenu === "clients" ? "admin-a-s-active" : ""}`}
+            className={`admin-a-s-menu-item ${
+              activeMenu === "clients" ? "admin-a-s-active" : ""
+            }`}
             onClick={() => setActiveMenu("clients")}
           >
             <span className="admin-a-s-menu-icon">👥</span>
@@ -1467,7 +1472,9 @@ const AdminDashboard = () => {
           </button>
 
           <button
-            className={`admin-a-s-menu-item ${activeMenu === "requests" ? "admin-a-s-active" : ""}`}
+            className={`admin-a-s-menu-item ${
+              activeMenu === "requests" ? "admin-a-s-active" : ""
+            }`}
             onClick={() => setActiveMenu("requests")}
           >
             <span className="admin-a-s-menu-icon">📋</span>
@@ -1507,8 +1514,18 @@ const AdminDashboard = () => {
               </span>
             )}
           </button>
+          
         </nav>
-
+        <hr className="admin-a-s-menu-separator" />
+        <button
+            className={`admin-a-s-resume ${
+              activeMenu === "resume" ? "admin-a-s-active" : ""
+            }`}
+            onClick={() => setActiveMenu("resume")}
+          >
+            
+            <span>Resume</span>
+          </button>
         <button className="admin-a-s-logout-btn" onClick={handleLogout}>
           <span className="admin-a-s-menu-icon">🚪</span>
           <span>Logout</span>

@@ -2153,6 +2153,68 @@ body {
   }
 }
 
+/* ==================== Resume Overrides ==================== */
+.admin-a-s-resume{
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  color: #333;
+
+}
+
+
+.admin-a-s-resume:hover {
+  color: #f5f5f5ff;
+  text-decoration: underline;
+}
+
+.resume-page {
+  padding: 20px;
+  color: #fff;
+}
+
+.section-card {
+  background: #222;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-card {
+  background: #333;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+
+input {
+  width: 100%;
+  margin: 6px 0;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+}
+
+.add-btn,
+.save-btn {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.save-btn {
+  background: #28a745;
+}
+
+
 /* ==================== SCROLLBAR STYLING ==================== */
 ::-webkit-scrollbar {
   width: 10px;

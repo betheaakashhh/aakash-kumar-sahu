@@ -9,6 +9,7 @@ import Signup from './Components/Signup/Signup.jsx'
 import Dashboard from './pages/Dashboard/Dashboard.jsx'
 import AdminDashboard from './pages/AdminSide/AdminDashboard.jsx'
 import AdminLogin from './Components/AdminLogin/AdminLogin.jsx'
+import ResumePage from './pages/ResumePage/ResumePage.jsx'
 
 
 
@@ -69,23 +70,16 @@ function App() {
         />
         
         {/* Uncomment when ready */}
-        {/* <Route 
+        <Route 
           path='/resume' 
           element={
-            <ProtectedRoute>
+            
               <ResumePage />
-            </ProtectedRoute>
+            
           } 
         />
         
-        <Route 
-          path='/certificates' 
-          element={
-            <ProtectedRoute>
-              <CertificatesPage />
-            </ProtectedRoute>
-          } 
-        /> */}
+        
 
         {/* ============= ADMIN PROTECTED ROUTES ============= */}
         <Route 
