@@ -18,7 +18,7 @@ const ResumeManager = () => {
   const fetchResume = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_URL}/api/resume/admin`, { headers });
+      const res = await fetch(`${API_URL}/api/resume/public`, { headers });
       const data = await res.json();
       if (data.success) {
         setResume(data.data);
