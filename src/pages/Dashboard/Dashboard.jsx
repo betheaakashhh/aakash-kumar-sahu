@@ -241,7 +241,7 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    window.location.href = '/login';
+    window.location.href = '/Home';
   };
 
   const getProjectStatus = (project) => {
