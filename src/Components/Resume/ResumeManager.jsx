@@ -14,26 +14,60 @@ const ResumeManager = () => {
     "Content-Type": "application/json",
   };
 
-  // Fetch resume on load
-  const fetchResume = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_URL}/api/resume/public`);
+  // Change the fetchResume function in ResumeManager.jsx
+const fetchResume = async () => {
+  try {
+    setLoading(true);
+    // Try admin endpoint first (requires auth)
+    const res = await fetch(`${API_URL}/api/resume/admin`, {
+      headers: headers // Keep the auth headers for admin endpoint
+    });
+    
+    if (res.ok) {
       const data = await res.json();
       if (data.success) {
         setResume(data.data);
+        return;
       }
-    } catch (error) {
-      console.error("Resume fetch error:", error);
-      alert("Failed to load resume");
-    } finally {
-      setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchResume();
-  }, []);
+    
+    // If admin endpoint fails, try public endpoint
+    const publicRes = await fetch(`${API_URL}/api/resume/public`);
+    if (publicRes.ok) {
+      const publicData = await publicRes.json();
+      if (publicData.success) {
+        setResume(publicData.data);
+      } else {
+        // Create empty resume structure if none exists
+        setResume({
+          fullName: "",
+          title: "",
+          email: "",
+          education: [],
+          certifications: [],
+          projects: [],
+          extracurricular: [],
+          skills: []
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Resume fetch error:", error);
+    // Create empty structure as fallback
+    setResume({
+      fullName: "",
+      title: "",
+      email: "",
+      education: [],
+      certifications: [],
+      projects: [],
+      extracurricular: [],
+      skills: []
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ==================== PERSONAL INFO ====================
   const handlePersonalInfoUpdate = async () => {
