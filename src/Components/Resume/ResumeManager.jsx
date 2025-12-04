@@ -1,119 +1,31 @@
 import React, { useState, useEffect } from "react";
-import "./resume.css";
+import "./ResumeManager.css";
 
 const API_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
 
 const ResumeManager = () => {
-  // Start with empty resume structure
-  const [resume, setResume] = useState({
-    fullName: "",
-    title: "",
-    email: "",
-    phone: "",
-    location: "",
-    portfolio: "",
-    linkedin: "",
-    github: "",
-    summary: "",
-    education: [],
-    certifications: [],
-    projects: [],
-    extracurricular: [],
-    skills: []
-  });
-  
+  const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('personal');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
-  // Get token from localStorage
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("adminToken");
-    if (!token) {
-      console.warn("No admin token found in localStorage");
-      setIsAuthenticated(false);
-      return null;
-    }
-    
-    setIsAuthenticated(true);
-    return {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    };
+  const headers = {
+    Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+    "Content-Type": "application/json",
   };
 
   // Fetch resume on load
   const fetchResume = async () => {
     try {
       setLoading(true);
-      
-      const headers = getAuthHeaders();
-      let resumeData = null;
-      
-      // Try admin endpoint if we have a token
-      if (headers) {
-        try {
-          const adminRes = await fetch(`${API_URL}/api/resume/admin`, {
-            headers
-          });
-          
-          if (adminRes.ok) {
-            const adminData = await adminRes.json();
-            if (adminData.success && adminData.data) {
-              resumeData = adminData.data;
-              console.log("Loaded resume from admin endpoint");
-            }
-          } else if (adminRes.status === 401 || adminRes.status === 403) {
-            console.log("Admin token invalid or expired");
-            setIsAuthenticated(false);
-          }
-        } catch (adminError) {
-          console.log("Admin endpoint error:", adminError.message);
-        }
+      const res = await fetch(`${API_URL}/api/resume/admin`, { headers });
+      const data = await res.json();
+      if (data.success) {
+        setResume(data.data);
       }
-      
-      // If admin endpoint didn't work or we have no token, try public
-      if (!resumeData) {
-        try {
-          const publicRes = await fetch(`${API_URL}/api/resume/public`);
-          if (publicRes.ok) {
-            const publicData = await publicRes.json();
-            if (publicData.success && publicData.data) {
-              resumeData = publicData.data;
-              console.log("Loaded resume from public endpoint");
-            } else if (publicData.message === "Resume not found") {
-              console.log("No resume found in database");
-              // Keep empty structure
-            }
-          }
-        } catch (publicError) {
-          console.log("Public endpoint error:", publicError.message);
-        }
-      }
-      
-      // If we got data, use it. Otherwise keep empty structure
-      if (resumeData) {
-        setResume({
-          fullName: resumeData.fullName || "",
-          title: resumeData.title || "",
-          email: resumeData.email || "",
-          phone: resumeData.phone || "",
-          location: resumeData.location || "",
-          portfolio: resumeData.portfolio || "",
-          linkedin: resumeData.linkedin || "",
-          github: resumeData.github || "",
-          summary: resumeData.summary || "",
-          education: resumeData.education || [],
-          certifications: resumeData.certifications || [],
-          projects: resumeData.projects || [],
-          extracurricular: resumeData.extracurricular || [],
-          skills: resumeData.skills || []
-        });
-      }
-      // If no data, keep the empty structure we already set
-      
     } catch (error) {
       console.error("Resume fetch error:", error);
+      alert("Failed to load resume");
     } finally {
       setLoading(false);
     }
@@ -126,81 +38,44 @@ const ResumeManager = () => {
   // ==================== PERSONAL INFO ====================
   const handlePersonalInfoUpdate = async () => {
     try {
-      const headers = getAuthHeaders();
-      if (!headers) {
-        alert("You need to be logged in as admin to save changes");
-        return;
-      }
-      
       const res = await fetch(`${API_URL}/api/resume`, {
         method: "PUT",
         headers,
-        body: JSON.stringify({
-          ...resume,
-          isPublished: true
-        }),
+        body: JSON.stringify(resume),
       });
-      
-      if (res.status === 401 || res.status === 403) {
-        alert("Session expired. Please login again.");
-        setIsAuthenticated(false);
-        return;
-      }
-      
       const data = await res.json();
       if (data.success) {
-        alert("Personal info saved successfully!");
+        alert("Personal info updated!");
         fetchResume();
-      } else {
-        alert("Failed to save: " + (data.message || "Unknown error"));
       }
     } catch (error) {
       console.error("Update error:", error);
-      alert("Error saving changes. Please check your connection.");
+      alert("Failed to update personal info");
     }
   };
 
   // ==================== EDUCATION ====================
   const handleAddEducation = async () => {
-    const newEducation = {
-      institution: "",
-      course: "",
-      location: "",
-      startYear: "",
-      endYear: "",
-      cgpa: "",
-    };
-    
-    // Update local state immediately
-    setResume({
-      ...resume,
-      education: [...resume.education, newEducation]
-    });
-    
-    // Try to save to backend if authenticated
-    const headers = getAuthHeaders();
-    if (headers) {
-      try {
-        const res = await fetch(`${API_URL}/api/resume/education`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify(newEducation),
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) {
-            fetchResume(); // Refresh from server
-            return;
-          }
-        }
-      } catch (error) {
-        console.error("Backend save error:", error);
+    try {
+      const res = await fetch(`${API_URL}/api/resume/education`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          institution: "",
+          course: "",
+          location: "",
+          startYear: "",
+          endYear: "",
+          cgpa: "",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchResume();
       }
+    } catch (error) {
+      console.error("Add education error:", error);
     }
-    
-    // If not authenticated or backend failed, just show success locally
-    alert("Education entry added locally. Save all changes when ready.");
   };
 
   const handleUpdateEducation = (index, field, value) => {
@@ -209,160 +84,249 @@ const ResumeManager = () => {
     setResume({ ...resume, education: updated });
   };
 
-  const handleSaveEducation = async (id, index) => {
-    const headers = getAuthHeaders();
-    if (!headers) {
-      alert("Please login to save to backend");
-      return;
-    }
-    
+  const handleSaveEducation = async (id) => {
     try {
-      const edu = resume.education[index];
+      const edu = resume.education.find(e => e._id === id);
       const res = await fetch(`${API_URL}/api/resume/education/${id}`, {
         method: "PUT",
         headers,
         body: JSON.stringify(edu),
       });
-      
       const data = await res.json();
       if (data.success) {
-        alert("Education updated in database!");
+        alert("Education updated!");
+        setEditingId(null);
         fetchResume();
-      } else {
-        alert("Saved locally. Backend update failed.");
       }
     } catch (error) {
       console.error("Save education error:", error);
-      alert("Saved locally. Could not connect to server.");
     }
   };
 
-  const handleDeleteEducation = async (id, index) => {
+  const handleDeleteEducation = async (id) => {
     if (!confirm("Delete this education entry?")) return;
-    
-    // Update local state
-    const updatedEducation = resume.education.filter((_, i) => i !== index);
-    setResume({ ...resume, education: updatedEducation });
-    
-    // Try to delete from backend if authenticated
-    const headers = getAuthHeaders();
-    if (headers && id && !id.startsWith('temp-')) {
-      try {
-        const res = await fetch(`${API_URL}/api/resume/education/${id}`, {
-          method: "DELETE",
-          headers,
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) {
-            console.log("Deleted from backend");
-          }
-        }
-      } catch (error) {
-        console.error("Backend delete error:", error);
-      }
-    }
-    
-    alert("Education entry removed.");
-  };
-
-  // ==================== SAVE ALL CHANGES ====================
-  const handleSaveAllChanges = async () => {
-    const headers = getAuthHeaders();
-    if (!headers) {
-      alert("You need to be logged in as admin to save changes");
-      // Redirect to login or show login modal
-      window.location.href = "/admin/login";
-      return;
-    }
-    
     try {
-      const res = await fetch(`${API_URL}/api/resume`, {
-        method: "PUT",
+      const res = await fetch(`${API_URL}/api/resume/education/${id}`, {
+        method: "DELETE",
         headers,
-        body: JSON.stringify({
-          ...resume,
-          isPublished: true
-        }),
       });
-      
-      if (res.status === 401 || res.status === 403) {
-        alert("Session expired. Please login again.");
-        localStorage.removeItem("adminToken");
-        window.location.href = "/admin/login";
-        return;
-      }
-      
       const data = await res.json();
       if (data.success) {
-        alert("✅ All changes saved successfully!");
+        alert("Education deleted!");
         fetchResume();
-      } else {
-        alert("❌ Failed to save: " + (data.message || "Unknown error"));
       }
     } catch (error) {
-      console.error("Save all error:", error);
-      alert("⚠️ Error saving changes. Please check your connection.");
+      console.error("Delete education error:", error);
     }
   };
 
-  // ==================== CHECK AUTH STATUS ====================
-  const checkAuthStatus = () => {
-    const token = localStorage.getItem("adminToken");
-    if (token) {
-      setIsAuthenticated(true);
-      return true;
+  // ==================== CERTIFICATIONS ====================
+  const handleAddCertification = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/resume/certifications`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          title: "",
+          issuer: "",
+          year: "",
+          description: "",
+          certificateLink: "",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchResume();
+      }
+    } catch (error) {
+      console.error("Add certification error:", error);
     }
-    return false;
   };
 
-  // Add temp IDs for local entries
-  const getItemId = (item, index) => {
-    return item._id || `temp-${Date.now()}-${index}`;
+  const handleUpdateCertification = (index, field, value) => {
+    const updated = [...resume.certifications];
+    updated[index][field] = value;
+    setResume({ ...resume, certifications: updated });
   };
 
-  if (loading) {
-    return (
-      <div className="rm-loading">
-        <div className="rm-loading-spinner"></div>
-        <p>Loading resume editor...</p>
-      </div>
-    );
-  }
+  const handleSaveCertification = async (id) => {
+    try {
+      const cert = resume.certifications.find(c => c._id === id);
+      const res = await fetch(`${API_URL}/api/resume/certifications/${id}`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(cert),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Certification updated!");
+        setEditingId(null);
+        fetchResume();
+      }
+    } catch (error) {
+      console.error("Save certification error:", error);
+    }
+  };
+
+  const handleDeleteCertification = async (id) => {
+    if (!confirm("Delete this certification?")) return;
+    try {
+      const res = await fetch(`${API_URL}/api/resume/certifications/${id}`, {
+        method: "DELETE",
+        headers,
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Certification deleted!");
+        fetchResume();
+      }
+    } catch (error) {
+      console.error("Delete certification error:", error);
+    }
+  };
+
+  // ==================== PROJECTS ====================
+  const handleAddProject = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/resume/projects`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          name: "",
+          description: "",
+          technologies: "",
+          githubLink: "",
+          liveLink: "",
+          startDate: "",
+          endDate: "",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchResume();
+      }
+    } catch (error) {
+      console.error("Add project error:", error);
+    }
+  };
+
+  const handleUpdateProject = (index, field, value) => {
+    const updated = [...resume.projects];
+    updated[index][field] = value;
+    setResume({ ...resume, projects: updated });
+  };
+
+  const handleSaveProject = async (id) => {
+    try {
+      const project = resume.projects.find(p => p._id === id);
+      const res = await fetch(`${API_URL}/api/resume/projects/${id}`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(project),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Project updated!");
+        setEditingId(null);
+        fetchResume();
+      }
+    } catch (error) {
+      console.error("Save project error:", error);
+    }
+  };
+
+  const handleDeleteProject = async (id) => {
+    if (!confirm("Delete this project?")) return;
+    try {
+      const res = await fetch(`${API_URL}/api/resume/projects/${id}`, {
+        method: "DELETE",
+        headers,
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Project deleted!");
+        fetchResume();
+      }
+    } catch (error) {
+      console.error("Delete project error:", error);
+    }
+  };
+
+  // ==================== EXTRACURRICULAR ====================
+  const handleAddExtracurricular = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/resume/extracurricular`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          title: "",
+          organization: "",
+          year: "",
+          description: "",
+          role: "",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchResume();
+      }
+    } catch (error) {
+      console.error("Add extracurricular error:", error);
+    }
+  };
+
+  const handleUpdateExtracurricular = (index, field, value) => {
+    const updated = [...resume.extracurricular];
+    updated[index][field] = value;
+    setResume({ ...resume, extracurricular: updated });
+  };
+
+  const handleSaveExtracurricular = async (id) => {
+    try {
+      const activity = resume.extracurricular.find(e => e._id === id);
+      const res = await fetch(`${API_URL}/api/resume/extracurricular/${id}`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(activity),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Extracurricular activity updated!");
+        setEditingId(null);
+        fetchResume();
+      }
+    } catch (error) {
+      console.error("Save extracurricular error:", error);
+    }
+  };
+
+  const handleDeleteExtracurricular = async (id) => {
+    if (!confirm("Delete this activity?")) return;
+    try {
+      const res = await fetch(`${API_URL}/api/resume/extracurricular/${id}`, {
+        method: "DELETE",
+        headers,
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Extracurricular activity deleted!");
+        fetchResume();
+      }
+    } catch (error) {
+      console.error("Delete extracurricular error:", error);
+    }
+  };
+
+  if (loading) return <div className="rm-loading">Loading resume...</div>;
+  if (!resume) return <div className="rm-error">Resume not found</div>;
 
   return (
     <div className="rm-resume-manager">
       <div className="rm-header">
         <h2>📄 Resume Manager</h2>
         <p className="rm-subtitle">
-          {resume.fullName ? `Editing: ${resume.fullName}` : "Create New Resume"}
-          {!isAuthenticated && (
-            <span style={{color: '#ff9800', marginLeft: '10px'}}>
-              ⚠️ Working offline - Login to save to database
-            </span>
-          )}
+          Edit your resume sections - changes will reflect on your portfolio
         </p>
-        
-        <div className="rm-action-buttons">
-          {!isAuthenticated && (
-            <button 
-              className="rm-login-btn"
-              onClick={() => window.location.href = "/admin/login"}
-            >
-              🔑 Login to Save
-            </button>
-          )}
-          
-          <button 
-            className="rm-save-all-btn" 
-            onClick={handleSaveAllChanges}
-            disabled={!isAuthenticated}
-            title={!isAuthenticated ? "Login required to save" : "Save all changes to database"}
-          >
-            {isAuthenticated ? "💾 Save All Changes" : "🔒 Login to Save"}
-          </button>
-        </div>
       </div>
 
       {/* Navigation Tabs */}
@@ -377,37 +341,35 @@ const ResumeManager = () => {
           className={`rm-tab ${activeSection === 'education' ? 'rm-tab-active' : ''}`}
           onClick={() => setActiveSection('education')}
         >
-          🎓 Education {resume.education.length > 0 && `(${resume.education.length})`}
+          🎓 Education
         </button>
         <button
           className={`rm-tab ${activeSection === 'certifications' ? 'rm-tab-active' : ''}`}
           onClick={() => setActiveSection('certifications')}
         >
-          📜 Certifications {resume.certifications.length > 0 && `(${resume.certifications.length})`}
+          📜 Certifications
         </button>
         <button
           className={`rm-tab ${activeSection === 'projects' ? 'rm-tab-active' : ''}`}
           onClick={() => setActiveSection('projects')}
         >
-          💻 Projects {resume.projects.length > 0 && `(${resume.projects.length})`}
+          💻 Projects
         </button>
         <button
           className={`rm-tab ${activeSection === 'extracurricular' ? 'rm-tab-active' : ''}`}
           onClick={() => setActiveSection('extracurricular')}
         >
-          🏆 Extracurricular {resume.extracurricular.length > 0 && `(${resume.extracurricular.length})`}
+          🏆 Extracurricular
         </button>
       </div>
 
-      {/* Main Content Area */}
+      {/* Section Content */}
       <div className="rm-content">
+        {/* ==================== PERSONAL INFO ==================== */}
         {activeSection === 'personal' && (
           <div className="rm-section">
             <div className="rm-section-header">
               <h3>👤 Personal Information</h3>
-              <span className="rm-auth-status">
-                {isAuthenticated ? "✅ Connected to database" : "⚠️ Working offline"}
-              </span>
             </div>
             
             <div className="rm-form-grid">
@@ -415,7 +377,7 @@ const ResumeManager = () => {
                 <label>Full Name *</label>
                 <input
                   type="text"
-                  value={resume.fullName}
+                  value={resume.fullName || ""}
                   onChange={(e) => setResume({ ...resume, fullName: e.target.value })}
                   placeholder="John Doe"
                 />
@@ -425,7 +387,7 @@ const ResumeManager = () => {
                 <label>Professional Title *</label>
                 <input
                   type="text"
-                  value={resume.title}
+                  value={resume.title || ""}
                   onChange={(e) => setResume({ ...resume, title: e.target.value })}
                   placeholder="Full Stack Developer"
                 />
@@ -435,7 +397,7 @@ const ResumeManager = () => {
                 <label>Email *</label>
                 <input
                   type="email"
-                  value={resume.email}
+                  value={resume.email || ""}
                   onChange={(e) => setResume({ ...resume, email: e.target.value })}
                   placeholder="john@example.com"
                 />
@@ -445,7 +407,7 @@ const ResumeManager = () => {
                 <label>Phone</label>
                 <input
                   type="tel"
-                  value={resume.phone}
+                  value={resume.phone || ""}
                   onChange={(e) => setResume({ ...resume, phone: e.target.value })}
                   placeholder="+1 234 567 8900"
                 />
@@ -455,7 +417,7 @@ const ResumeManager = () => {
                 <label>Location</label>
                 <input
                   type="text"
-                  value={resume.location}
+                  value={resume.location || ""}
                   onChange={(e) => setResume({ ...resume, location: e.target.value })}
                   placeholder="New York, USA"
                 />
@@ -465,7 +427,7 @@ const ResumeManager = () => {
                 <label>Portfolio Website</label>
                 <input
                   type="url"
-                  value={resume.portfolio}
+                  value={resume.portfolio || ""}
                   onChange={(e) => setResume({ ...resume, portfolio: e.target.value })}
                   placeholder="https://yourportfolio.com"
                 />
@@ -475,7 +437,7 @@ const ResumeManager = () => {
                 <label>LinkedIn</label>
                 <input
                   type="url"
-                  value={resume.linkedin}
+                  value={resume.linkedin || ""}
                   onChange={(e) => setResume({ ...resume, linkedin: e.target.value })}
                   placeholder="https://linkedin.com/in/yourprofile"
                 />
@@ -485,7 +447,7 @@ const ResumeManager = () => {
                 <label>GitHub</label>
                 <input
                   type="url"
-                  value={resume.github}
+                  value={resume.github || ""}
                   onChange={(e) => setResume({ ...resume, github: e.target.value })}
                   placeholder="https://github.com/yourusername"
                 />
@@ -495,47 +457,38 @@ const ResumeManager = () => {
                 <label>Professional Summary</label>
                 <textarea
                   rows="4"
-                  value={resume.summary}
+                  value={resume.summary || ""}
                   onChange={(e) => setResume({ ...resume, summary: e.target.value })}
                   placeholder="Brief professional summary..."
                 />
               </div>
             </div>
 
-            <div className="rm-section-footer">
-              <button className="rm-save-btn" onClick={handlePersonalInfoUpdate}>
-                {isAuthenticated ? "💾 Save to Database" : "💾 Save Locally"}
-              </button>
-              <p className="rm-help-text">
-                {isAuthenticated 
-                  ? "Changes will be visible on your portfolio immediately"
-                  : "Login to save changes to database and make them public"}
-              </p>
-            </div>
+            <button className="rm-save-btn" onClick={handlePersonalInfoUpdate}>
+              💾 Save Personal Info
+            </button>
           </div>
         )}
 
-        {/* EDUCATION SECTION */}
+        {/* ==================== EDUCATION ==================== */}
         {activeSection === 'education' && (
           <div className="rm-section">
             <div className="rm-section-header">
               <h3>🎓 Education</h3>
-              <div className="rm-section-actions">
-                <button className="rm-add-btn" onClick={handleAddEducation}>
-                  + Add Education
-                </button>
-              </div>
+              <button className="rm-add-btn" onClick={handleAddEducation}>
+                + Add Education
+              </button>
             </div>
 
-            {resume.education.length > 0 ? (
+            {resume.education && resume.education.length > 0 ? (
               resume.education.map((edu, index) => (
-                <div key={getItemId(edu, index)} className="rm-item-card">
+                <div key={edu._id} className="rm-item-card">
                   <div className="rm-item-header">
                     <h4>Education Entry {index + 1}</h4>
                     <div className="rm-item-actions">
                       <button
                         className="rm-delete-btn-small"
-                        onClick={() => handleDeleteEducation(getItemId(edu, index), index)}
+                        onClick={() => handleDeleteEducation(edu._id)}
                       >
                         🗑️ Delete
                       </button>
@@ -604,21 +557,12 @@ const ResumeManager = () => {
                     </div>
                   </div>
 
-                  <div className="rm-item-footer">
-                    {isAuthenticated && edu._id && !edu._id.startsWith('temp-') && (
-                      <button
-                        className="rm-save-btn rm-save-btn-small"
-                        onClick={() => handleSaveEducation(edu._id, index)}
-                      >
-                        💾 Update in Database
-                      </button>
-                    )}
-                    <span className="rm-item-status">
-                      {edu._id && !edu._id.startsWith('temp-') 
-                        ? "✅ Saved in database" 
-                        : "📝 Local changes (not saved)"}
-                    </span>
-                  </div>
+                  <button
+                    className="rm-save-btn rm-save-btn-small"
+                    onClick={() => handleSaveEducation(edu._id)}
+                  >
+                    💾 Save Entry
+                  </button>
                 </div>
               ))
             ) : (
@@ -629,23 +573,296 @@ const ResumeManager = () => {
           </div>
         )}
 
-        {/* Add similar sections for Certifications, Projects, Extracurricular */}
-        {/* They follow the same pattern as Education section */}
+        {/* ==================== CERTIFICATIONS ==================== */}
+        {activeSection === 'certifications' && (
+          <div className="rm-section">
+            <div className="rm-section-header">
+              <h3>📜 Certifications</h3>
+              <button className="rm-add-btn" onClick={handleAddCertification}>
+                + Add Certification
+              </button>
+            </div>
 
-        {/* INFO MESSAGE FOR OFFLINE MODE */}
-        {!isAuthenticated && (
-          <div className="rm-offline-notice">
-            <h4>⚠️ Working in Offline Mode</h4>
-            <p>
-              You are editing locally. To save your resume to the database and make it 
-              visible on your portfolio, please login as admin.
-            </p>
-            <button 
-              className="rm-login-btn-large"
-              onClick={() => window.location.href = "/admin/login"}
-            >
-              🔑 Login as Admin
-            </button>
+            {resume.certifications && resume.certifications.length > 0 ? (
+              resume.certifications.map((cert, index) => (
+                <div key={cert._id} className="rm-item-card">
+                  <div className="rm-item-header">
+                    <h4>Certification {index + 1}</h4>
+                    <button
+                      className="rm-delete-btn-small"
+                      onClick={() => handleDeleteCertification(cert._id)}
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
+
+                  <div className="rm-form-grid">
+                    <div className="rm-form-group rm-form-group-full">
+                      <label>Certificate Title *</label>
+                      <input
+                        type="text"
+                        value={cert.title}
+                        onChange={(e) => handleUpdateCertification(index, "title", e.target.value)}
+                        placeholder="AWS Certified Developer"
+                      />
+                    </div>
+
+                    <div className="rm-form-group">
+                      <label>Issuing Organization *</label>
+                      <input
+                        type="text"
+                        value={cert.issuer}
+                        onChange={(e) => handleUpdateCertification(index, "issuer", e.target.value)}
+                        placeholder="Amazon Web Services"
+                      />
+                    </div>
+
+                    <div className="rm-form-group">
+                      <label>Year *</label>
+                      <input
+                        type="text"
+                        value={cert.year}
+                        onChange={(e) => handleUpdateCertification(index, "year", e.target.value)}
+                        placeholder="2023"
+                      />
+                    </div>
+
+                    <div className="rm-form-group rm-form-group-full">
+                      <label>Description</label>
+                      <textarea
+                        rows="3"
+                        value={cert.description}
+                        onChange={(e) => handleUpdateCertification(index, "description", e.target.value)}
+                        placeholder="Brief description of the certification..."
+                      />
+                    </div>
+
+                    <div className="rm-form-group rm-form-group-full">
+                      <label>Certificate Link (Optional)</label>
+                      <input
+                        type="url"
+                        value={cert.certificateLink}
+                        onChange={(e) => handleUpdateCertification(index, "certificateLink", e.target.value)}
+                        placeholder="https://certificate-url.com"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    className="rm-save-btn rm-save-btn-small"
+                    onClick={() => handleSaveCertification(cert._id)}
+                  >
+                    💾 Save Certification
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="rm-empty-state">
+                <p>No certifications yet. Click "Add Certification" to create one.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ==================== PROJECTS ==================== */}
+        {activeSection === 'projects' && (
+          <div className="rm-section">
+            <div className="rm-section-header">
+              <h3>💻 Projects</h3>
+              <button className="rm-add-btn" onClick={handleAddProject}>
+                + Add Project
+              </button>
+            </div>
+
+            {resume.projects && resume.projects.length > 0 ? (
+              resume.projects.map((project, index) => (
+                <div key={project._id} className="rm-item-card">
+                  <div className="rm-item-header">
+                    <h4>Project {index + 1}</h4>
+                    <button
+                      className="rm-delete-btn-small"
+                      onClick={() => handleDeleteProject(project._id)}
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
+
+                  <div className="rm-form-grid">
+                    <div className="rm-form-group rm-form-group-full">
+                      <label>Project Name *</label>
+                      <input
+                        type="text"
+                        value={project.name}
+                        onChange={(e) => handleUpdateProject(index, "name", e.target.value)}
+                        placeholder="E-commerce Platform"
+                      />
+                    </div>
+
+                    <div className="rm-form-group rm-form-group-full">
+                      <label>Description *</label>
+                      <textarea
+                        rows="4"
+                        value={project.description}
+                        onChange={(e) => handleUpdateProject(index, "description", e.target.value)}
+                        placeholder="Detailed project description..."
+                      />
+                    </div>
+
+                    <div className="rm-form-group rm-form-group-full">
+                      <label>Technologies Used</label>
+                      <input
+                        type="text"
+                        value={project.technologies}
+                        onChange={(e) => handleUpdateProject(index, "technologies", e.target.value)}
+                        placeholder="React, Node.js, MongoDB"
+                      />
+                    </div>
+
+                    <div className="rm-form-group">
+                      <label>GitHub Link</label>
+                      <input
+                        type="url"
+                        value={project.githubLink}
+                        onChange={(e) => handleUpdateProject(index, "githubLink", e.target.value)}
+                        placeholder="https://github.com/..."
+                      />
+                    </div>
+
+                    <div className="rm-form-group">
+                      <label>Live Demo Link</label>
+                      <input
+                        type="url"
+                        value={project.liveLink}
+                        onChange={(e) => handleUpdateProject(index, "liveLink", e.target.value)}
+                        placeholder="https://project-demo.com"
+                      />
+                    </div>
+
+                    <div className="rm-form-group">
+                      <label>Start Date</label>
+                      <input
+                        type="text"
+                        value={project.startDate}
+                        onChange={(e) => handleUpdateProject(index, "startDate", e.target.value)}
+                        placeholder="Jan 2023"
+                      />
+                    </div>
+
+                    <div className="rm-form-group">
+                      <label>End Date</label>
+                      <input
+                        type="text"
+                        value={project.endDate}
+                        onChange={(e) => handleUpdateProject(index, "endDate", e.target.value)}
+                        placeholder="Mar 2023"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    className="rm-save-btn rm-save-btn-small"
+                    onClick={() => handleSaveProject(project._id)}
+                  >
+                    💾 Save Project
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="rm-empty-state">
+                <p>No projects yet. Click "Add Project" to create one.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ==================== EXTRACURRICULAR ==================== */}
+        {activeSection === 'extracurricular' && (
+          <div className="rm-section">
+            <div className="rm-section-header">
+              <h3>🏆 Extracurricular Activities</h3>
+              <button className="rm-add-btn" onClick={handleAddExtracurricular}>
+                + Add Activity
+              </button>
+            </div>
+
+            {resume.extracurricular && resume.extracurricular.length > 0 ? (
+              resume.extracurricular.map((activity, index) => (
+                <div key={activity._id} className="rm-item-card">
+                  <div className="rm-item-header">
+                    <h4>Activity {index + 1}</h4>
+                    <button
+                      className="rm-delete-btn-small"
+                      onClick={() => handleDeleteExtracurricular(activity._id)}
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
+
+                  <div className="rm-form-grid">
+                    <div className="rm-form-group rm-form-group-full">
+                      <label>Activity Title *</label>
+                      <input
+                        type="text"
+                        value={activity.title}
+                        onChange={(e) => handleUpdateExtracurricular(index, "title", e.target.value)}
+                        placeholder="Hackathon Winner"
+                      />
+                    </div>
+
+                    <div className="rm-form-group">
+                      <label>Organization</label>
+                      <input
+                        type="text"
+                        value={activity.organization}
+                        onChange={(e) => handleUpdateExtracurricular(index, "organization", e.target.value)}
+                        placeholder="Tech Club"
+                      />
+                    </div>
+
+                    <div className="rm-form-group">
+                      <label>Year *</label>
+                      <input
+                        type="text"
+                        value={activity.year}
+                        onChange={(e) => handleUpdateExtracurricular(index, "year", e.target.value)}
+                        placeholder="2023"
+                      />
+                    </div>
+
+                    <div className="rm-form-group">
+                      <label>Role</label>
+                      <input
+                        type="text"
+                        value={activity.role}
+                        onChange={(e) => handleUpdateExtracurricular(index, "role", e.target.value)}
+                        placeholder="Team Lead"
+                      />
+                    </div>
+
+                    <div className="rm-form-group rm-form-group-full">
+                      <label>Description *</label>
+                      <textarea
+                        rows="3"
+                        value={activity.description}
+                        onChange={(e) => handleUpdateExtracurricular(index, "description", e.target.value)}
+                        placeholder="Describe your involvement and achievements..."
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    className="rm-save-btn rm-save-btn-small"
+                    onClick={() => handleSaveExtracurricular(activity._id)}
+                  >
+                    💾 Save Activity
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="rm-empty-state">
+                <p>No activities yet. Click "Add Activity" to create one.</p>
+              </div>
+            )}
           </div>
         )}
       </div>
