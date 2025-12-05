@@ -323,7 +323,7 @@ const ResumeManager = () => {
   return (
     <div className="rm-resume-manager">
       <div className="rm-header">
-        <h2>📄 Resume Manager</h2>
+        <h2>Resume Manager</h2>
         <p className="rm-subtitle">
           Edit your resume sections - changes will reflect on your portfolio
         </p>
@@ -369,7 +369,7 @@ const ResumeManager = () => {
         {activeSection === 'personal' && (
           <div className="rm-section">
             <div className="rm-section-header">
-              <h3>👤 Personal Information</h3>
+              <h3> Personal Information</h3>
             </div>
             
             <div className="rm-form-grid">
@@ -474,7 +474,7 @@ const ResumeManager = () => {
         {activeSection === 'education' && (
           <div className="rm-section">
             <div className="rm-section-header">
-              <h3>🎓 Education</h3>
+              <h3>Education</h3>
               <button className="rm-add-btn" onClick={handleAddEducation}>
                 + Add Education
               </button>
@@ -490,7 +490,7 @@ const ResumeManager = () => {
                         className="rm-delete-btn-small"
                         onClick={() => handleDeleteEducation(edu._id)}
                       >
-                        🗑️ Delete
+                        Delete
                       </button>
                     </div>
                   </div>
