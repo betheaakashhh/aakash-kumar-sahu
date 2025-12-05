@@ -134,12 +134,12 @@ function App() {
 }
 
 // Placeholder components (uncomment when ready)
-const ResumePage = () => (
-  <div style={{ padding: '2rem', color: 'white', background: '#0a0a0f', minHeight: '100vh' }}>
-    <h1>Resume (Protected)</h1>
-    <p>Your resume content here...</p>
-  </div>
-);
+// const ResumePage = () => (
+//   <div style={{ padding: '2rem', color: 'white', background: '#0a0a0f', minHeight: '100vh' }}>
+//     <h1>Resume (Protected)</h1>
+//     <p>Your resume content here...</p>
+//   </div>
+// );
 
 const CertificatesPage = () => (
   <div style={{ padding: '2rem', color: 'white', background: '#0a0a0f', minHeight: '100vh' }}>
