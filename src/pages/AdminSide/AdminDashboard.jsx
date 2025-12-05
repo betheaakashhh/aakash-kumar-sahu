@@ -1517,7 +1517,7 @@ const AdminDashboard = () => {
           
         </nav>
         <hr className="admin-a-s-menu-separator" />
-        <button
+       <button
             className={`admin-a-s-resume ${
               activeMenu === "resume" ? "admin-a-s-active" : ""
             }`}
@@ -1527,7 +1527,7 @@ const AdminDashboard = () => {
             <span>Resume</span>
           </button>
         <button className="admin-a-s-logout-btn" onClick={handleLogout}>
-          <span className="admin-a-s-menu-icon">🚪</span>
+          <span className="admin-a-s-menu-icon"></span>
           <span>Logout</span>
         </button>
       </div>

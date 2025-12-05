@@ -471,7 +471,8 @@ body {
 
 /* Current Work Detail View */
 .admin-a-s-current-work-detail {
-  background: white;
+ background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   padding: 32px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -494,12 +495,13 @@ body {
 .admin-a-s-current-work-title-section h2 {
   font-size: 32px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #e1dbdbff;
   margin: 0;
 }
 
 .admin-a-s-client-info-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;
@@ -566,7 +568,8 @@ body {
 }
 
 .admin-a-s-detail-box {
-  background: white;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 16px;
   border-radius: 8px;
   display: flex;
@@ -576,7 +579,7 @@ body {
 
 .admin-a-s-detail-label {
   font-size: 12px;
-  color: #666;
+  color: #efeaeaff;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -585,7 +588,7 @@ body {
 .admin-a-s-detail-value {
   font-size: 16px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #e4a6a6ff;
 }
 
 .admin-a-s-payment-overview-card {
@@ -609,13 +612,14 @@ body {
 }
 
 .admin-a-s-payment-stat {
-  background: white;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 20px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 16px;
-  border: 2px solid #e0e0e0;
+ 
   transition: all 0.3s ease;
 }
 
@@ -2155,17 +2159,36 @@ body {
 
 /* ==================== Resume Overrides ==================== */
 .admin-a-s-resume{
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 16px;
-  color: #333;
-
+   display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+   background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  
+  
 }
-
-
 .admin-a-s-resume:hover {
-  color: #f5f5f5ff;
-  text-decoration: underline;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  
 }
+
+.admin-a-s-resume:active {
+  transform: translateY(0);
+}
+.admin-a-s-resume:focus {
+  border: 1px solid rgba(17, 149, 12, 0.59);
+   background: rgba(79, 96, 226, 0.38);
+}
+
 
 .resume-page {
   padding: 20px;
