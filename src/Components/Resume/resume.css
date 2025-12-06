@@ -215,8 +215,9 @@
 
 /* Item Cards */
 .rm-item-card {
-  background: #f8f9fa;
-  border: 2px solid #ecf0f1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+ 
   border-radius: 12px;
   padding: 25px;
   margin-bottom: 20px;
