@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import "./dashboard.css";
 
@@ -5,7 +6,8 @@ const Dashboard = () => {
   const [activeMenu, setActiveMenu] = useState("my-projects");
   const [clientInfo, setClientInfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [invoices, setInvoices] = useState([]);
+  // Invoice state - stores invoices by projectId
+  const [projectInvoices, setProjectInvoices] = useState({}); // {projectId: [invoice1, invoice2]}
   const [invoiceLoading, setInvoiceLoading] = useState({});
 
   // New states for detailed view
@@ -54,7 +56,6 @@ const Dashboard = () => {
       fetchRequestedProjects();
     } else if (activeMenu === "work-projects") {
       fetchWorkProjects();
-      workProjects.forEach(p => fetchInvoices(p._id));
     }
   }, [activeMenu]);
 
@@ -68,28 +69,145 @@ const Dashboard = () => {
 
 const fetchInvoices = async (projectId) => {
   try {
+    setInvoiceLoading(prev => ({ ...prev, [projectId]: true }));
     const token = localStorage.getItem('token');
-    const res = await fetch(`${API_URL}/api/invoices/project/${projectId}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+    
+    console.log('🔍 Fetching invoices for project:', projectId);
+    
+    const res = await fetch(`${API_URL}/api/invoices/project/${projectId}/summary`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
     });
     
     if (res.ok) {
       const data = await res.json();
+      console.log('📄 Full response data:', data);
+      
       if (data.success) {
-        setInvoices(prev => ({
+        const invoices = data.data.invoices || [];
+        console.log('✅ Setting', invoices.length, 'invoices for project', projectId);
+        
+        setProjectInvoices(prev => ({
           ...prev,
-          [projectId]: data.invoices // store invoices mapping by project
+          [projectId]: invoices
         }));
       }
     } else {
-      console.error("Failed to fetch invoices for project:", projectId);
+      console.error('❌ Response not OK:', res.status);
     }
   } catch (error) {
-    console.error("Error fetching invoices:", error);
+    console.error("❌ Error:", error);
+    setProjectInvoices(prev => ({
+      ...prev,
+      [projectId]: []
+    }));
+  } finally {
+    setInvoiceLoading(prev => ({ ...prev, [projectId]: false }));
   }
 };
 
+  // Download invoice PDF
+  const handleDownloadInvoice = async (projectId, invoiceNumber) => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    // First get invoice data
+    const response = await fetch(
+      `${API_URL}/api/invoices/project/${projectId}/download/${invoiceNumber}`,
+      {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
+    if (response.ok) {
+      const data = await response.json();
+      
+      if (data.success && data.data.invoice) {
+        // Create a text file with invoice data (you can upgrade to PDF later)
+        const invoice = data.data.invoice;
+        const invoiceText = `
+          ====================================
+          INVOICE: ${invoice.invoiceNumber}
+          ====================================
+          Project: ${invoice.projectName}
+          Issue Date: ${new Date(invoice.issueDate).toLocaleDateString()}
+          Due Date: ${new Date(invoice.dueDate).toLocaleDateString()}
+          Status: ${invoice.status}
+          
+          ====================================
+          CLIENT INFORMATION
+          ====================================
+          Name: ${invoice.clientName}
+          Email: ${invoice.clientEmail}
+          
+          ====================================
+          INVOICE ITEMS
+          ====================================
+          ${invoice.items.map((item, index) => `
+            ${index + 1}. ${item.description}
+               Quantity: ${item.quantity}
+               Unit Price: $${item.unitPrice}
+               Total: $${item.total}
+          `).join('')}
+          
+          ====================================
+          PAYMENT SUMMARY
+          ====================================
+          Subtotal: $${invoice.subtotal}
+          Tax: $${invoice.tax}
+          Total Amount: $${invoice.totalAmount}
+          Amount Paid: $${invoice.amountPaid}
+          Balance Due: $${invoice.balanceDue}
+          
+          ====================================
+          NOTES
+          ====================================
+          ${invoice.notes || 'No additional notes'}
+          
+          ====================================
+          PAYMENT INSTRUCTIONS
+          ====================================
+          Please make payment via ${invoice.paymentMethod}
+          Thank you for your business!
+        `;
+        
+        // Create and download text file
+        const blob = new Blob([invoiceText], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice-${invoiceNumber}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        
+        alert('Invoice downloaded as text file!');
+      }
+    } else {
+      const errorData = await response.json();
+      alert(errorData.message || 'Failed to download invoice');
+    }
+  } catch (error) {
+    console.error("Error downloading invoice:", error);
+    alert("Error downloading invoice: " + error.message);
+  }
+};
+  // Get latest invoice for a project
+  const getLatestInvoice = (projectId) => {
+    const invoices = projectInvoices[projectId];
+    if (!invoices || invoices.length === 0) return null;
+    
+    // Sort by issue date (newest first)
+    return invoices.sort((a, b) => 
+      new Date(b.issueDate) - new Date(a.issueDate)
+    )[0];
+  };
 
   const fetchUserProfile = async () => {
     try {
@@ -296,43 +414,105 @@ const fetchInvoices = async (projectId) => {
     }
   };
 
-  const handleGenerateInvoice = async (projectRequestId) => {
-  try {
-    setInvoiceLoading(prev => ({ ...prev, [projectRequestId]: true }));
+  // Render invoice section in project detail view
+  const renderInvoiceSection = (project) => {
+    const invoices = projectInvoices[project._id] || [];
+    const latestInvoice = getLatestInvoice(project._id);
     
-    const token = localStorage.getItem('token');
-    const res = await fetch(`${API_URL}/api/invoices/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ projectRequestId: projectRequestId })
-    });
+  const isLoading = invoiceLoading[project._id];
+    
+    return (
+      <div className="invoice-section">
+         <div className="invoice-header-with-refresh">
+        <h3>Invoices</h3>
+         <button 
+          className="refresh-invoices-btn"
+          onClick={() => fetchInvoices(project._id)}
+          disabled={isLoading}
+          style={{
+            padding: '8px 16px',
+            background: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: isLoading ? 'not-allowed' : 'pointer'
+          }}
+        >{isLoading ? '🔄 Loading...' : '🔄 Refresh'}
+        </button>
+        </div>
+        
+        
+        {invoices.length === 0 ? (
+          <div className="empty-invoices">
+            <p>No invoices available for this project.</p>
+            <p className="invoice-note">
+              <small>Invoices will appear here when generated by admin.</small>
+            </p>
+          </div>
+        ) : (
+          <div className="invoices-list">
+            <div className="invoices-summary">
+              <div className="invoice-summary-item">
+                <span className="summary-label">Total Invoices:</span>
+                <span className="summary-value">{invoices.length}</span>
+              </div>
+              <div className="invoice-summary-item">
+                <span className="summary-label">Latest Invoice:</span>
+                <span className="summary-value">
+                  {latestInvoice ? `#${latestInvoice.invoiceNumber}` : 'N/A'}
+                </span>
+              </div>
+            </div>
 
-    if (res.ok) {
-      const data = await res.json();
-      alert("Invoice generated successfully!");
-      
-      if (data.success) {
-        // Add the new invoice to state
-        setInvoices(prev => ({
-          ...prev,
-          [projectRequestId]: [...(prev[projectRequestId] || []), data.invoice]
-        }));
-      }
-    } else {
-      const errorData = await res.json();
-      alert(errorData.message || "Failed to generate invoice");
-    }
-  } catch (err) {
-    console.error("Invoice generation error:", err);
-    alert("Error generating invoice: " + err.message);
-  } finally {
-    setInvoiceLoading(prev => ({ ...prev, [projectRequestId]: false }));
-  }
-};
+            <div className="invoices-table-container">
+              <table className="invoices-table">
+                <thead>
+                  <tr>
+                    <th>Invoice #</th>
+                    <th>Type</th>
+                    <th>Issue Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.map((invoice) => (
+                    <tr key={invoice.invoiceNumber}>
+                      <td>{invoice.invoiceNumber}</td>
+                      <td>
+                        <span className={`invoice-type-badge type-${invoice.invoiceType || 'standard'}`}>
+                          {invoice.invoiceType || 'Standard'}
+                        </span>
+                      </td>
+                      <td>{new Date(invoice.issueDate).toLocaleDateString()}</td>
+                      <td>${invoice.totalAmount?.toFixed(2)}</td>
+                      <td>
+                        <span className={`invoice-status-badge status-${invoice.status}`}>
+                          {invoice.status}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className="download-invoice-btn"
+                          onClick={() => handleDownloadInvoice(project._id, invoice.invoiceNumber)}
+                          disabled={invoiceLoading[project._id]}
+                        >
+                          {invoiceLoading[project._id] ? 'Downloading...' : '📄 Download'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
+  // Rest of your existing functions...
 
   // Mock data for portfolio projects
   const myProjects = [
@@ -509,6 +689,7 @@ const fetchInvoices = async (projectId) => {
           const acceptedDate = selectedWorkProject.timeline?.startDate
             ? new Date(selectedWorkProject.timeline.startDate)
             : null;
+          const latestInvoice = getLatestInvoice(selectedWorkProject._id);
 
           return (
             <div className="content-section">
@@ -593,24 +774,22 @@ const fetchInvoices = async (projectId) => {
                     </div>
                   </div>
                 </div>
-                <div className="invoice-action-container">
-  {invoices[selectedWorkProject._id]?.length > 0 ? (
-    <button 
-      className="invoice-action-btn"
-      onClick={() => window.open(`${API_URL}/api/invoices/download/${invoices[selectedWorkProject._id][0]._id}`)}
-    >
-      📄 Download Invoice
-    </button>
-  ) : (
-    <button 
-      className="invoice-action-btn"
-      onClick={() => handleGenerateInvoice(selectedWorkProject._id)}
-    >
-      💳 Generate Invoice
-    </button>
-  )}
-</div>
 
+                {/* Invoice Download Button in Detail View */}
+                {latestInvoice && (
+                  <div className="invoice-action-container">
+                    <button 
+                      className="invoice-action-btn"
+                      onClick={() => handleDownloadInvoice(selectedWorkProject._id, latestInvoice.invoiceNumber)}
+                      disabled={invoiceLoading[selectedWorkProject._id]}
+                    >
+                      {invoiceLoading[selectedWorkProject._id] ? 'Downloading...' : '📄 Download Latest Invoice'}
+                    </button>
+                    <p className="invoice-info">
+                      Invoice #{latestInvoice.invoiceNumber} - ${latestInvoice.totalAmount?.toFixed(2)} - {latestInvoice.status}
+                    </p>
+                  </div>
+                )}
 
                 {selectedWorkProject.payment && (
                   <div className="payment-progress-section">
@@ -632,10 +811,13 @@ const fetchInvoices = async (projectId) => {
                           selectedWorkProject.payment.finalBudget) *
                           100
                       )}
-                      % Completed
+                      % Paid
                     </p>
                   </div>
                 )}
+
+                {/* Invoice Section in Detail View */}
+                {renderInvoiceSection(selectedWorkProject)}
 
                 {/* Admin Commits Section */}
                 <div className="commits-section">
@@ -740,113 +922,109 @@ const fetchInvoices = async (projectId) => {
             </p>
             {workProjects.length > 0 ? (
               <div className="work-projects-list">
-                {workProjects.map((project) => (
-                  <div
-                    key={project._id}
-                    className="work-project-card clickable-card"
-                    onClick={() => setSelectedWorkProject(project)}
-                  >
-                    <div className="work-project-header">
-                      <div>
-                        <h3>{project.projectName}</h3>
-                        {project.timeline && (
-                          <p className="project-dates">
-                            {project.timeline.startDate &&
-                              `Started: ${new Date(
-                                project.timeline.startDate
-                              ).toLocaleDateString()}`}
-                            {project.timeline.deadline &&
-                              ` | Deadline: ${new Date(
-                                project.timeline.deadline
-                              ).toLocaleDateString()}`}
-                          </p>
-                        )}
-                      </div>
-                      <span className="status-badge status-accepted">
-                        {project.status}
-                      </span>
-                    </div>
-                    <p className="project-description">{project.description}</p>
-
-                    {project.payment && (
-                      <>
-                        <div className="project-financials">
-                          <div className="financial-item">
-                            <span className="financial-label">
-                              Total Budget
-                            </span>
-                            <span className="financial-value">
-                              ${project.payment.finalBudget?.toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="financial-item">
-                            <span className="financial-label">Paid</span>
-                            <span className="financial-value financial-success">
-                              ${project.payment.paidAmount?.toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="financial-item">
-                            <span className="financial-label">Remaining</span>
-                            <span className="financial-value financial-warning">
-                              ${project.payment.dueAmount?.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="progress-bar">
-                          <div
-                            className="progress-fill"
-                            style={{
-                              width: `${
-                                (project.payment.paidAmount /
-                                  project.payment.finalBudget) *
-                                100
-                              }%`,
-                            }}
-                          ></div>
-                        </div>
-                        <p className="progress-text">
-                          {Math.round(
-                            (project.payment.paidAmount /
-                              project.payment.finalBudget) *
-                              100
-                          )}
-                          % paid
-                        </p>
-                      </>
-                    )}
+                {workProjects.map((project) => {
+                  const latestInvoice = getLatestInvoice(project._id);
+                  
+                  return (
                     <div
-                      className="invoice-button-wrapper"
-                      onClick={(e) => e.stopPropagation()} // this prevents opening detail page
+                      key={project._id}
+                      className="work-project-card clickable-card"
+                      onClick={() => setSelectedWorkProject(project)}
                     >
-                      {invoices[project._id]?.length > 0 ? (
-  <button
-    className="small-btn green-btn"
-    onClick={() =>
-      window.open(
-        `${API_URL}/api/invoices/download/${
-          invoices[project._id][0]._id
-        }`
-      )
-    }
-  >
-    📄 Download Invoice
-  </button>
-) : (
-  <button
-    className="small-btn yellow-btn"
-    onClick={() => handleGenerateInvoice(project._id)}
-    disabled={invoiceLoading[project._id]}
-  >
-    {invoiceLoading[project._id] ? 'Generating...' : 'Generate Invoice'}
-  </button>
-)}
-                    </div>
+                      <div className="work-project-header">
+                        <div>
+                          <h3>{project.projectName}</h3>
+                          {project.timeline && (
+                            <p className="project-dates">
+                              {project.timeline.startDate &&
+                                `Started: ${new Date(
+                                  project.timeline.startDate
+                                ).toLocaleDateString()}`}
+                              {project.timeline.deadline &&
+                                ` | Deadline: ${new Date(
+                                  project.timeline.deadline
+                                ).toLocaleDateString()}`}
+                            </p>
+                          )}
+                        </div>
+                        <span className="status-badge status-accepted">
+                          {project.status}
+                        </span>
+                      </div>
+                      <p className="project-description">{project.description}</p>
 
-                    <div className="card-hover-indicator">
-                      <span>Click to view details →</span>
+                      {project.payment && (
+                        <>
+                          <div className="project-financials">
+                            <div className="financial-item">
+                              <span className="financial-label">
+                                Total Budget
+                              </span>
+                              <span className="financial-value">
+                                ${project.payment.finalBudget?.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="financial-item">
+                              <span className="financial-label">Paid</span>
+                              <span className="financial-value financial-success">
+                                ${project.payment.paidAmount?.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="financial-item">
+                              <span className="financial-label">Remaining</span>
+                              <span className="financial-value financial-warning">
+                                ${project.payment.dueAmount?.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="progress-bar">
+                            <div
+                              className="progress-fill"
+                              style={{
+                                width: `${
+                                  (project.payment.paidAmount /
+                                    project.payment.finalBudget) *
+                                  100
+                                }%`,
+                              }}
+                            ></div>
+                          </div>
+                          <p className="progress-text">
+                            {Math.round(
+                              (project.payment.paidAmount /
+                                project.payment.finalBudget) *
+                                100
+                            )}
+                            % paid
+                          </p>
+                        </>
+                      )}
+                      
+                      {/* Invoice Download Button in Card View */}
+                      {latestInvoice && (
+                        <div
+                          className="invoice-button-wrapper"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            className="small-btn green-btn"
+                            onClick={() => handleDownloadInvoice(project._id, latestInvoice.invoiceNumber)}
+                            disabled={invoiceLoading[project._id]}
+                          >
+                            {invoiceLoading[project._id] ? 'Downloading...' : '📄 Download Invoice'}
+                          </button>
+                          <small className="invoice-card-info">
+                            Invoice #{latestInvoice.invoiceNumber}
+                          </small>
+                        </div>
+                      )}
+
+                      <div className="card-hover-indicator">
+                        <span>Click to view details →</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="empty-state">

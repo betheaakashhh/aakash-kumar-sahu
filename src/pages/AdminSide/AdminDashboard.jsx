@@ -62,6 +62,179 @@ const AdminDashboard = () => {
     "Content-Type": "application/json",
   });
 
+  const [invoiceForm, setInvoiceForm] = useState({
+  invoiceType: 'initial',
+  items: [{ description: '', quantity: 1, unitPrice: 0 }],
+  dueDate: '',
+  taxRate: 0,
+  paymentMethod: 'Bank Transfer',
+  notes: ''
+});
+
+const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+const [selectedProjectForInvoice, setSelectedProjectForInvoice] = useState(null);
+
+// Add this function to handle invoice creation
+const handleCreateInvoice = async () => {
+  if (!selectedProjectForInvoice) return;
+  
+  try {
+    const response = await fetch(
+      `${API_URL}/api/admin/projects/requests/${selectedProjectForInvoice._id}/invoice`,
+      {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          invoiceType: invoiceForm.invoiceType,
+          items: invoiceForm.items.filter(item => item.description && item.unitPrice > 0),
+          dueDate: invoiceForm.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          taxRate: invoiceForm.taxRate,
+          paymentMethod: invoiceForm.paymentMethod,
+          notes: invoiceForm.notes
+        }),
+      }
+    );
+
+    if (response.ok) {
+      alert('Invoice created successfully!');
+      setShowInvoiceModal(false);
+      setInvoiceForm({
+        invoiceType: 'initial',
+        items: [{ description: '', quantity: 1, unitPrice: 0 }],
+        dueDate: '',
+        taxRate: 0,
+        paymentMethod: 'Bank Transfer',
+        notes: ''
+      });
+      
+      // Refresh project data
+      if (selectedCurrentProject) {
+        fetchCurrentWorkProjectDetails(selectedCurrentProject._id);
+      }
+      if (selectedClient) {
+        fetchClientDetails(selectedClient.client._id);
+      }
+    } else {
+      const error = await response.json();
+      alert(error.message || 'Failed to create invoice');
+    }
+  } catch (error) {
+    console.error('Error creating invoice:', error);
+    alert('Error creating invoice: ' + error.message);
+  }
+};
+
+// Function to open invoice modal
+const handleOpenInvoiceModal = (project, type = 'initial') => {
+  setSelectedProjectForInvoice(project);
+  
+  // Pre-fill form based on project
+  const projectBudget = project.payment?.finalBudget || project.budget || 0;
+  let invoiceAmount = projectBudget;
+  let invoiceType = type;
+  let description = '';
+  
+  if (type === 'initial' && !project.payment?.initialPayment) {
+    invoiceAmount = projectBudget * 0.5;
+    description = 'Initial Deposit - Project Kickoff';
+  } else if (type === 'final' && project.payment?.dueAmount > 0) {
+    invoiceAmount = project.payment.dueAmount;
+    description = 'Final Payment - Project Completion';
+    invoiceType = 'final';
+  } else if (type === 'milestone') {
+    invoiceAmount = projectBudget * 0.25;
+    description = 'Milestone Payment - Progress Update';
+    invoiceType = 'milestone';
+  } else {
+    description = 'Project Services Payment';
+    invoiceType = 'standard';
+  }
+  
+  setInvoiceForm({
+    invoiceType: invoiceType,
+    items: [{
+      description: `${description} - ${project.projectName}`,
+      quantity: 1,
+      unitPrice: invoiceAmount
+    }],
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    taxRate: 0,
+    paymentMethod: 'Bank Transfer',
+    notes: `Invoice for ${project.projectName}`
+  });
+  
+  setShowInvoiceModal(true);
+};
+
+// Function to add invoice item
+const addInvoiceItem = () => {
+  setInvoiceForm(prev => ({
+    ...prev,
+    items: [...prev.items, { description: '', quantity: 1, unitPrice: 0 }]
+  }));
+};
+
+// Function to remove invoice item
+const removeInvoiceItem = (index) => {
+  setInvoiceForm(prev => ({
+    ...prev,
+    items: prev.items.filter((_, i) => i !== index)
+  }));
+};
+
+// Function to update invoice item
+const updateInvoiceItem = (index, field, value) => {
+  const newItems = [...invoiceForm.items];
+  newItems[index][field] = field === 'quantity' || field === 'unitPrice' 
+    ? parseFloat(value) || 0 
+    : value;
+  
+  if (field === 'quantity' || field === 'unitPrice') {
+    newItems[index].total = newItems[index].quantity * newItems[index].unitPrice;
+  }
+  
+  setInvoiceForm(prev => ({ ...prev, items: newItems }));
+};
+
+// Function to mark invoice as paid
+const handleMarkInvoiceAsPaid = async (projectId, invoiceNumber) => {
+  if (!window.confirm('Mark this invoice as paid?')) return;
+  
+  try {
+    const response = await fetch(
+      `${API_URL}/api/admin/projects/requests/${projectId}/invoices/${invoiceNumber}/pay`,
+      {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          amount: null, // Will use invoice balance due
+          paymentMethod: 'Bank Transfer',
+          note: 'Payment received',
+          isInitialPayment: false
+        }),
+      }
+    );
+
+    if (response.ok) {
+      alert('Invoice marked as paid successfully!');
+      
+      // Refresh data
+      if (selectedCurrentProject) {
+        fetchCurrentWorkProjectDetails(selectedCurrentProject._id);
+      }
+      if (selectedClient) {
+        fetchClientDetails(selectedClient.client._id);
+      }
+    } else {
+      const error = await response.json();
+      alert(error.message || 'Failed to mark invoice as paid');
+    }
+  } catch (error) {
+    console.error('Error marking invoice as paid:', error);
+    alert('Error marking invoice as paid: ' + error.message);
+  }
+};
+
   const fetchAdminProfile = async () => {
     try {
       const response = await fetch(`${API_URL}/api/auth/profile`, {
@@ -182,30 +355,32 @@ const AdminDashboard = () => {
   };
 
   const handleAcceptProject = async () => {
-    try {
-      const response = await fetch(
-        `${API_URL}/api/admin/projects/requests/${selectedProject._id}/accept`,
-        {
-          method: "PUT",
-          headers: getAuthHeaders(),
-          body: JSON.stringify(acceptForm),
-        }
-      );
-      if (response.ok) {
-        alert("Project accepted successfully!");
-        setSelectedProject(null);
-        fetchRequests();
-        setAcceptForm({ finalBudget: "", startDate: "", deadline: "" });
-      } else {
-        const error = await response.json();
-        alert(error.message || "Failed to accept project");
+  try {
+    const response = await fetch(
+      `${API_URL}/api/admin/projects/requests/${selectedProject._id}/accept`,
+      {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          ...acceptForm,
+          createInitialInvoice: true // Add this flag
+        }),
       }
-    } catch (error) {
-      console.error("Error accepting project:", error);
-      alert("Error accepting project");
+    );
+    if (response.ok) {
+      alert("Project accepted successfully! Initial invoice created.");
+      setSelectedProject(null);
+      fetchRequests();
+      setAcceptForm({ finalBudget: "", startDate: "", deadline: "" });
+    } else {
+      const error = await response.json();
+      alert(error.message || "Failed to accept project");
     }
-  };
-
+  } catch (error) {
+    console.error("Error accepting project:", error);
+    alert("Error accepting project");
+  }
+};
   const handleNegotiateProject = async () => {
     try {
       const response = await fetch(
@@ -612,6 +787,16 @@ const AdminDashboard = () => {
                           {project.status}
                         </span>
                       </div>
+                      {project.status === 'accepted' && (
+      <div className="admin-a-s-invoice-actions-mini">
+        <button 
+          className="admin-a-s-create-invoice-btn"
+          onClick={() => handleOpenInvoiceModal(project, 'standard')}
+        >
+          📄 Create Invoice
+        </button>
+      </div>
+    )}
                       <p className="admin-a-s-project-desc">{project.description}</p>
                       <div className="admin-a-s-project-meta">
                         <span>Budget: ${project.budget.toLocaleString()}</span>
@@ -1085,6 +1270,30 @@ const AdminDashboard = () => {
                 {selectedCurrentProject.payment && (
                   <div className="admin-a-s-payment-overview-card">
                     <h3>Payment Overview</h3>
+                     <div className="admin-a-s-invoice-actions">
+      <button 
+        className="admin-a-s-invoice-btn admin-a-s-initial-btn"
+        onClick={() => handleOpenInvoiceModal(selectedCurrentProject, 'initial')}
+        disabled={selectedCurrentProject.payment?.initialPayment}
+      >
+        {selectedCurrentProject.payment?.initialPayment ? '✓ Initial Invoice Sent' : 'Create Initial Invoice'}
+      </button>
+      
+      <button 
+        className="admin-a-s-invoice-btn admin-a-s-milestone-btn"
+        onClick={() => handleOpenInvoiceModal(selectedCurrentProject, 'milestone')}
+      >
+        Create Milestone Invoice
+      </button>
+      
+      <button 
+        className="admin-a-s-invoice-btn admin-a-s-final-btn"
+        onClick={() => handleOpenInvoiceModal(selectedCurrentProject, 'final')}
+        disabled={selectedCurrentProject.payment?.dueAmount <= 0}
+      >
+        {selectedCurrentProject.payment?.dueAmount > 0 ? 'Create Final Invoice' : 'Fully Paid'}
+      </button>
+    </div>
                     <div className="admin-a-s-payment-stats-grid">
                       <div className="admin-a-s-payment-stat">
                         <span className="admin-a-s-stat-icon">💰</span>
@@ -1281,6 +1490,180 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               )}
+
+              {showInvoiceModal && (
+  <div
+    className="admin-a-s-modal-overlay"
+    onClick={() => setShowInvoiceModal(false)}
+  >
+    <div
+      className="admin-a-s-modal-content admin-a-s-invoice-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="admin-a-s-modal-header">
+        <h3>Create Invoice</h3>
+        <button
+          className="admin-a-s-modal-close"
+          onClick={() => setShowInvoiceModal(false)}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="admin-a-s-invoice-form">
+        <div className="admin-a-s-invoice-project-info">
+          <h4>{selectedProjectForInvoice?.projectName}</h4>
+          <p>Client: {selectedProjectForInvoice?.userId?.name}</p>
+          {selectedProjectForInvoice?.payment && (
+            <p>Budget: ${selectedProjectForInvoice.payment.finalBudget?.toLocaleString()}</p>
+          )}
+        </div>
+
+        <div className="admin-a-s-form-group">
+          <label>Invoice Type:</label>
+          <select
+            value={invoiceForm.invoiceType}
+            onChange={(e) => setInvoiceForm({...invoiceForm, invoiceType: e.target.value})}
+          >
+            <option value="initial">Initial Payment (50%)</option>
+            <option value="milestone">Milestone Payment</option>
+            <option value="final">Final Payment</option>
+            <option value="standard">Standard Invoice</option>
+          </select>
+        </div>
+
+        <div className="admin-a-s-invoice-items-section">
+          <h5>Invoice Items:</h5>
+          {invoiceForm.items.map((item, index) => (
+            <div key={index} className="admin-a-s-invoice-item-row">
+              <input
+                type="text"
+                placeholder="Description"
+                value={item.description}
+                onChange={(e) => updateInvoiceItem(index, 'description', e.target.value)}
+                className="admin-a-s-item-description"
+              />
+              <input
+                type="number"
+                placeholder="Qty"
+                value={item.quantity}
+                onChange={(e) => updateInvoiceItem(index, 'quantity', e.target.value)}
+                className="admin-a-s-item-qty"
+                min="1"
+              />
+              <input
+                type="number"
+                placeholder="Unit Price"
+                value={item.unitPrice}
+                onChange={(e) => updateInvoiceItem(index, 'unitPrice', e.target.value)}
+                className="admin-a-s-item-price"
+                step="0.01"
+              />
+              <span className="admin-a-s-item-total">
+                ${(item.quantity * item.unitPrice).toFixed(2)}
+              </span>
+              {invoiceForm.items.length > 1 && (
+                <button
+                  type="button"
+                  className="admin-a-s-remove-item-btn"
+                  onClick={() => removeInvoiceItem(index)}
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            className="admin-a-s-add-item-btn"
+            onClick={addInvoiceItem}
+          >
+            + Add Item
+          </button>
+        </div>
+
+        <div className="admin-a-s-invoice-details-grid">
+          <div className="admin-a-s-form-group">
+            <label>Due Date:</label>
+            <input
+              type="date"
+              value={invoiceForm.dueDate}
+              onChange={(e) => setInvoiceForm({...invoiceForm, dueDate: e.target.value})}
+            />
+          </div>
+          
+          <div className="admin-a-s-form-group">
+            <label>Tax Rate (%):</label>
+            <input
+              type="number"
+              value={invoiceForm.taxRate}
+              onChange={(e) => setInvoiceForm({...invoiceForm, taxRate: parseFloat(e.target.value) || 0})}
+              step="0.1"
+              min="0"
+              max="100"
+            />
+          </div>
+          
+          <div className="admin-a-s-form-group">
+            <label>Payment Method:</label>
+            <select
+              value={invoiceForm.paymentMethod}
+              onChange={(e) => setInvoiceForm({...invoiceForm, paymentMethod: e.target.value})}
+            >
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="PayPal">PayPal</option>
+              <option value="Cash">Cash</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="admin-a-s-form-group admin-a-s-full-width">
+          <label>Notes:</label>
+          <textarea
+            value={invoiceForm.notes}
+            onChange={(e) => setInvoiceForm({...invoiceForm, notes: e.target.value})}
+            rows="3"
+            placeholder="Additional notes or terms..."
+          />
+        </div>
+
+        {/* Invoice Summary */}
+        <div className="admin-a-s-invoice-summary">
+          <div className="admin-a-s-summary-row">
+            <span>Subtotal:</span>
+            <span>${invoiceForm.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0).toFixed(2)}</span>
+          </div>
+          <div className="admin-a-s-summary-row">
+            <span>Tax ({invoiceForm.taxRate}%):</span>
+            <span>${(invoiceForm.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) * (invoiceForm.taxRate / 100)).toFixed(2)}</span>
+          </div>
+          <div className="admin-a-s-summary-row admin-a-s-total-row">
+            <span>Total Amount:</span>
+            <span>${(invoiceForm.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) * (1 + invoiceForm.taxRate / 100)).toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-a-s-modal-actions">
+        <button
+          type="button"
+          className="admin-a-s-cancel-btn"
+          onClick={() => setShowInvoiceModal(false)}
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          className="admin-a-s-submit-btn"
+          onClick={handleCreateInvoice}
+        >
+          Create Invoice
+        </button>
+      </div>
+    </div>
+  </div>
+)}
             </div>
           );
         }
@@ -1534,6 +1917,7 @@ const AdminDashboard = () => {
 
       <div className="admin-a-s-content-area">{renderContent()}</div>
     </div>
+    
   );
 };
 
