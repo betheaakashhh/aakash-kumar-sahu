@@ -7,16 +7,19 @@ import ModernHeroSection from '../MidSection/ModernHeroSection'
 import HashTag from '../Hashtag/HashTag'
 import ScrollingShowcase from '../../Components/ScollingText/ScrollingShowcase'
 import DailyCodeChallenge from '../ChallengeSection/DailyCodeChallenge'
+import SearchSection from '../SearchSection/SearchSection'
 const Home = () => {
   return (
     <div>
         <Navbar />
-        <ScrollFade><MainHeroSection /></ScrollFade>
-        <ScrollFade><ImageHeroSection /></ScrollFade>
-        <ScrollFade><ModernHeroSection /></ScrollFade>
-        <ScrollFade><HashTag /></ScrollFade>
-        <ScrollFade><ScrollingShowcase /></ScrollFade>
-        <ScrollFade><DailyCodeChallenge /></ScrollFade>
+        <MainHeroSection />
+        <ImageHeroSection />
+        <ModernHeroSection />
+        <SearchSection />
+         <HashTag />
+        <ScrollingShowcase />
+        <DailyCodeChallenge />
+       
     </div>
   )
 }

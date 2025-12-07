@@ -5,7 +5,13 @@
   position: relative;
   min-height: 100vh;
   width: 100%;
-  background: #0a0a0a;
+ background: hsla(0, 0%, 8%, 1);
+
+background: linear-gradient(60deg, hsla(0, 0%, 8%, 1) 0%, hsla(210, 6%, 6%, 1.00) 0%, hsla(0, 0%, 3%, 1) 56%, hsla(0, 0%, 0%, 1) 100%);
+
+background: -moz-linear-gradient(60deg, hsla(0, 0%, 8%, 1) 0%, hsla(0, 0%, 1%, 1.00) 0%, hsla(0, 0%, 3%, 1) 56%, hsla(0, 0%, 0%, 1) 100%);
+
+background: -webkit-linear-gradient(360deg, hsla(0, 0%, 8%, 1) 0%, hsla(240, 5%, 8%, 1.00) 0%, hsla(0, 0%, 3%, 1) 56%, hsla(0, 0%, 0%, 1) 100%);
   overflow: hidden;
   padding: 80px 20px;
   display: flex;
@@ -16,6 +22,7 @@
 /* ==================== ANIMATED BACKGROUND ==================== */
 
 .modern-dark-background {
+  
   position: absolute;
   top: 0;
   left: 0;
@@ -37,7 +44,7 @@
 .orb-1 {
   width: 600px;
   height: 600px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 1);
   top: -20%;
   left: -15%;
   animation-delay: 0s;
@@ -46,7 +53,7 @@
 .orb-2 {
   width: 500px;
   height: 500px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(10, 10, 10, 1);
   bottom: -20%;
   right: -15%;
   animation-delay: 8s;
@@ -55,7 +62,7 @@
 .orb-3 {
   width: 450px;
   height: 450px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(8, 8, 8, 1);
   top: 40%;
   right: 30%;
   animation-delay: 16s;
