@@ -1,35 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import './dashboard.css';
+import React, { useState, useEffect } from "react";
+import "./dashboard.css";
 
 const Dashboard = () => {
-  const [activeMenu, setActiveMenu] = useState('my-projects');
+  const [activeMenu, setActiveMenu] = useState("my-projects");
   const [clientInfo, setClientInfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+  const [invoices, setInvoices] = useState([]);
+  const [invoiceLoading, setInvoiceLoading] = useState({});
+
   // New states for detailed view
   const [selectedWorkProject, setSelectedWorkProject] = useState(null);
-  
+
   // New Project Form State
   const [newProjectForm, setNewProjectForm] = useState({
-    projectName: '',
-    duration: '',
-    budget: '',
-    tools: '',
-    projectType: '',
-    description: '',
-    attachmentLink: ''
+    projectName: "",
+    duration: "",
+    budget: "",
+    tools: "",
+    projectType: "",
+    description: "",
+    attachmentLink: "",
   });
-  
+
   const [clientForm, setClientForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    country: '',
-    city: '',
-    projectExperience: '',
-    contactMethod: '',
-    budgetPreference: ''
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
+    country: "",
+    city: "",
+    projectExperience: "",
+    contactMethod: "",
+    budgetPreference: "",
   });
 
   // Projects State
@@ -38,21 +40,21 @@ const Dashboard = () => {
   const [notifications, setNotifications] = useState({
     newWorkProjects: 0,
     negotiableProjects: 0,
-    rejectedProjects: 0
+    rejectedProjects: 0,
   });
 
-  const API_URL = import.meta.env.VITE_BASE_URL ||'http://localhost:5000';
- 
+  const API_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
 
   // Fetch data on component mount and menu change
   useEffect(() => {
     fetchUserProfile();
     fetchNotifications();
-    
-    if (activeMenu === 'requested') {
+
+    if (activeMenu === "requested") {
       fetchRequestedProjects();
-    } else if (activeMenu === 'work-projects') {
+    } else if (activeMenu === "work-projects") {
       fetchWorkProjects();
+      workProjects.forEach(p => fetchInvoices(p._id));
     }
   }, [activeMenu]);
 
@@ -64,13 +66,38 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
+const fetchInvoices = async (projectId) => {
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/api/invoices/project/${projectId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        setInvoices(prev => ({
+          ...prev,
+          [projectId]: data.invoices // store invoices mapping by project
+        }));
+      }
+    } else {
+      console.error("Failed to fetch invoices for project:", projectId);
+    }
+  } catch (error) {
+    console.error("Error fetching invoices:", error);
+  }
+};
+
+
+
   const fetchUserProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/api/auth/profile`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
@@ -88,21 +115,21 @@ const Dashboard = () => {
           budgetPreference: data.budgetPreference || "",
         });
         setClientForm({
-          name: data.name || '',
-          email: data.email || '',
-          phone: data.phone || '',
-          company: data.company || '',
-          country: data.country || '',
-          city: data.city || '',
-          projectExperience: data.projectExperience || '',
-          contactMethod: data.contactMethod || 'email',
-          budgetPreference: data.budgetPreference || ''
+          name: data.name || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          company: data.company || "",
+          country: data.country || "",
+          city: data.city || "",
+          projectExperience: data.projectExperience || "",
+          contactMethod: data.contactMethod || "email",
+          budgetPreference: data.budgetPreference || "",
         });
       } else {
-        console.error('Failed to fetch profile');
+        console.error("Failed to fetch profile");
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error("Error fetching profile:", error);
     } finally {
       setLoading(false);
     }
@@ -110,11 +137,11 @@ const Dashboard = () => {
 
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/api/projects/notifications`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
@@ -122,104 +149,104 @@ const Dashboard = () => {
         setNotifications(data);
       }
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error("Error fetching notifications:", error);
     }
   };
 
   const fetchRequestedProjects = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/api/projects/requests`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
         setRequestedProjects(data);
       } else {
-        console.error('Failed to fetch projects');
+        console.error("Failed to fetch projects");
       }
     } catch (error) {
-      console.error('Error fetching requested projects:', error);
+      console.error("Error fetching requested projects:", error);
     }
   };
 
   const fetchWorkProjects = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/api/projects/work`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
         setWorkProjects(data);
       } else {
-        console.error('Failed to fetch work projects');
+        console.error("Failed to fetch work projects");
       }
     } catch (error) {
-      console.error('Error fetching work projects:', error);
+      console.error("Error fetching work projects:", error);
     }
   };
 
   const handleNewProjectSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/api/projects/requests`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newProjectForm)
+        body: JSON.stringify(newProjectForm),
       });
 
       if (response.ok) {
-        alert('Project request submitted successfully!');
+        alert("Project request submitted successfully!");
         setNewProjectForm({
-          projectName: '',
-          duration: '',
-          budget: '',
-          tools: '',
-          projectType: '',
-          description: '',
-          attachmentLink: ''
+          projectName: "",
+          duration: "",
+          budget: "",
+          tools: "",
+          projectType: "",
+          description: "",
+          attachmentLink: "",
         });
-        setActiveMenu('requested');
+        setActiveMenu("requested");
         fetchRequestedProjects();
         fetchNotifications();
       } else {
         const errorData = await response.json();
-        alert(errorData.message || 'Failed to submit project request');
+        alert(errorData.message || "Failed to submit project request");
       }
     } catch (error) {
-      console.error('Error submitting project:', error);
-      alert('Error submitting project request: ' + error.message);
+      console.error("Error submitting project:", error);
+      alert("Error submitting project request: " + error.message);
     }
   };
 
   const handleClientInput = (e) => {
     const { name, value } = e.target;
-    setClientForm(prev => ({ ...prev, [name]: value }));
+    setClientForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/api/auth/profile/update`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(clientForm)
+        body: JSON.stringify(clientForm),
       });
 
       if (res.ok) {
@@ -233,73 +260,117 @@ const Dashboard = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewProjectForm(prev => ({
+    setNewProjectForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/';
+    localStorage.removeItem("token");
+    window.location.href = "/";
   };
 
   const getProjectStatus = (project) => {
-    if (!project.timeline || !project.timeline.deadline) return 'progress';
-    
+    if (!project.timeline || !project.timeline.deadline) return "progress";
+
     const now = new Date();
     const deadline = new Date(project.timeline.deadline);
     const daysRemaining = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
-    
-    if (daysRemaining < 0) return 'delay';
-    if (daysRemaining <= 7) return 'urgent';
-    return 'progress';
+
+    if (daysRemaining < 0) return "delay";
+    if (daysRemaining <= 7) return "urgent";
+    return "progress";
   };
 
   const getStatusBadgeText = (status) => {
-    switch(status) {
-      case 'delay': return 'Delayed';
-      case 'urgent': return 'Urgent';
-      case 'progress': return 'In Progress';
-      default: return 'Active';
+    switch (status) {
+      case "delay":
+        return "Delayed";
+      case "urgent":
+        return "Urgent";
+      case "progress":
+        return "In Progress";
+      default:
+        return "Active";
     }
   };
+
+  const handleGenerateInvoice = async (projectRequestId) => {
+  try {
+    setInvoiceLoading(prev => ({ ...prev, [projectRequestId]: true }));
+    
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/api/invoices/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ projectRequestId: projectRequestId })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      alert("Invoice generated successfully!");
+      
+      if (data.success) {
+        // Add the new invoice to state
+        setInvoices(prev => ({
+          ...prev,
+          [projectRequestId]: [...(prev[projectRequestId] || []), data.invoice]
+        }));
+      }
+    } else {
+      const errorData = await res.json();
+      alert(errorData.message || "Failed to generate invoice");
+    }
+  } catch (err) {
+    console.error("Invoice generation error:", err);
+    alert("Error generating invoice: " + err.message);
+  } finally {
+    setInvoiceLoading(prev => ({ ...prev, [projectRequestId]: false }));
+  }
+};
+
 
   // Mock data for portfolio projects
   const myProjects = [
     {
       id: 1,
-      title: 'E-Commerce Platform',
-      description: 'Full-stack e-commerce solution with React and Node.js',
-      status: 'Completed',
-      technologies: ['React', 'Node.js', 'MongoDB'],
-      githubLink: 'https://github.com/aakash/ecommerce'
+      title: "E-Commerce Platform",
+      description: "Full-stack e-commerce solution with React and Node.js",
+      status: "Completed",
+      technologies: ["React", "Node.js", "MongoDB"],
+      githubLink: "https://github.com/aakash/ecommerce",
     },
     {
       id: 2,
-      title: 'Task Management App',
-      description: 'Real-time task tracking application',
-      status: 'Completed',
-      technologies: ['React', 'Firebase', 'Tailwind'],
-      githubLink: 'https://github.com/aakash/taskapp'
+      title: "Task Management App",
+      description: "Real-time task tracking application",
+      status: "Completed",
+      technologies: ["React", "Firebase", "Tailwind"],
+      githubLink: "https://github.com/aakash/taskapp",
     },
     {
       id: 3,
-      title: 'Weather Dashboard',
-      description: 'Weather forecast application with API integration',
-      status: 'Completed',
-      technologies: ['React', 'API Integration', 'CSS3'],
-      githubLink: 'https://github.com/aakash/weather'
-    }
+      title: "Weather Dashboard",
+      description: "Weather forecast application with API integration",
+      status: "Completed",
+      technologies: ["React", "API Integration", "CSS3"],
+      githubLink: "https://github.com/aakash/weather",
+    },
   ];
 
   const renderContent = () => {
     switch (activeMenu) {
-      case 'my-projects':
+      case "my-projects":
         return (
           <div className="content-section">
             <h2 className="section-title">My Portfolio Projects</h2>
-            <p className="section-description">Personal projects showcasing my development skills</p>
+            <p className="section-description">
+              Personal projects showcasing my development skills
+            </p>
             <div className="projects-grid">
               {myProjects.map((project) => (
                 <div key={project.id} className="project-card">
@@ -312,10 +383,17 @@ const Dashboard = () => {
                   <p className="project-description">{project.description}</p>
                   <div className="tech-stack">
                     {project.technologies.map((tech, idx) => (
-                      <span key={idx} className="tech-tag">{tech}</span>
+                      <span key={idx} className="tech-tag">
+                        {tech}
+                      </span>
                     ))}
                   </div>
-                  <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="project-link">
+                  <a
+                    href={project.githubLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="project-link"
+                  >
                     View on GitHub →
                   </a>
                 </div>
@@ -324,47 +402,62 @@ const Dashboard = () => {
           </div>
         );
 
-      case 'profile':
+      case "profile":
         return (
           <div className="content-section">
             <h2 className="section-title">Client Profile</h2>
 
             <form className="new-project-form" onSubmit={handleProfileSubmit}>
-              
               <div className="form-grid">
                 <div className="form-group">
                   <label>Name</label>
-                  <input type="text" name="name"
+                  <input
+                    type="text"
+                    name="name"
                     value={clientForm.name}
-                    onChange={handleClientInput} required />
+                    onChange={handleClientInput}
+                    required
+                  />
                 </div>
 
                 <div className="form-group">
                   <label>Phone</label>
-                  <input type="text" name="phone"
+                  <input
+                    type="text"
+                    name="phone"
                     value={clientForm.phone}
-                    onChange={handleClientInput} />
+                    onChange={handleClientInput}
+                  />
                 </div>
 
                 <div className="form-group">
                   <label>Company</label>
-                  <input type="text" name="company"
+                  <input
+                    type="text"
+                    name="company"
                     value={clientForm.company}
-                    onChange={handleClientInput} />
+                    onChange={handleClientInput}
+                  />
                 </div>
 
                 <div className="form-group">
                   <label>Country</label>
-                  <input type="text" name="country"
+                  <input
+                    type="text"
+                    name="country"
                     value={clientForm.country}
-                    onChange={handleClientInput} />
+                    onChange={handleClientInput}
+                  />
                 </div>
 
                 <div className="form-group">
                   <label>City</label>
-                  <input type="text" name="city"
+                  <input
+                    type="text"
+                    name="city"
                     value={clientForm.city}
-                    onChange={handleClientInput} />
+                    onChange={handleClientInput}
+                  />
                 </div>
               </div>
 
@@ -393,29 +486,34 @@ const Dashboard = () => {
 
               <div className="form-group full-width">
                 <label>Budget Preference</label>
-                <input type="text" name="budgetPreference"
+                <input
+                  type="text"
+                  name="budgetPreference"
                   placeholder="e.g. $1k - $5k"
                   value={clientForm.budgetPreference}
-                  onChange={handleClientInput} />
+                  onChange={handleClientInput}
+                />
               </div>
 
-              <button type="submit" className="submit-btn">Save Profile</button>
+              <button type="submit" className="submit-btn">
+                Save Profile
+              </button>
             </form>
           </div>
         );
 
-      case 'work-projects':
+      case "work-projects":
         if (selectedWorkProject) {
           const projectStatus = getProjectStatus(selectedWorkProject);
           const requestedDate = new Date(selectedWorkProject.createdAt);
-          const acceptedDate = selectedWorkProject.timeline?.startDate 
-            ? new Date(selectedWorkProject.timeline.startDate) 
+          const acceptedDate = selectedWorkProject.timeline?.startDate
+            ? new Date(selectedWorkProject.timeline.startDate)
             : null;
 
           return (
             <div className="content-section">
-              <button 
-                className="back-btn" 
+              <button
+                className="back-btn"
                 onClick={() => setSelectedWorkProject(null)}
               >
                 ← Back to Work Projects
@@ -426,22 +524,28 @@ const Dashboard = () => {
                   <div className="work-detail-title-section">
                     <h2>{selectedWorkProject.projectName}</h2>
                     <div className="work-detail-badges">
-                      <span className="status-badge status-accepted">Accepted</span>
+                      <span className="status-badge status-accepted">
+                        Accepted
+                      </span>
                       <span className={`status-badge status-${projectStatus}`}>
                         {getStatusBadgeText(projectStatus)}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="work-detail-dates">
                     <div className="date-item">
                       <span className="date-label">Requested:</span>
-                      <span className="date-value">{requestedDate.toLocaleDateString()}</span>
+                      <span className="date-value">
+                        {requestedDate.toLocaleDateString()}
+                      </span>
                     </div>
                     {acceptedDate && (
                       <div className="date-item">
                         <span className="date-label">Accepted:</span>
-                        <span className="date-value">{acceptedDate.toLocaleDateString()}</span>
+                        <span className="date-value">
+                          {acceptedDate.toLocaleDateString()}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -458,7 +562,9 @@ const Dashboard = () => {
                     <div className="financial-content">
                       <span className="financial-label">Total Budget</span>
                       <span className="financial-amount">
-                        ${selectedWorkProject.payment?.finalBudget?.toLocaleString() || 0}
+                        $
+                        {selectedWorkProject.payment?.finalBudget?.toLocaleString() ||
+                          0}
                       </span>
                     </div>
                   </div>
@@ -468,7 +574,9 @@ const Dashboard = () => {
                     <div className="financial-content">
                       <span className="financial-label">Paid</span>
                       <span className="financial-amount">
-                        ${selectedWorkProject.payment?.paidAmount?.toLocaleString() || 0}
+                        $
+                        {selectedWorkProject.payment?.paidAmount?.toLocaleString() ||
+                          0}
                       </span>
                     </div>
                   </div>
@@ -478,24 +586,53 @@ const Dashboard = () => {
                     <div className="financial-content">
                       <span className="financial-label">Due</span>
                       <span className="financial-amount">
-                        ${selectedWorkProject.payment?.dueAmount?.toLocaleString() || 0}
+                        $
+                        {selectedWorkProject.payment?.dueAmount?.toLocaleString() ||
+                          0}
                       </span>
                     </div>
                   </div>
                 </div>
+                <div className="invoice-action-container">
+  {invoices[selectedWorkProject._id]?.length > 0 ? (
+    <button 
+      className="invoice-action-btn"
+      onClick={() => window.open(`${API_URL}/api/invoices/download/${invoices[selectedWorkProject._id][0]._id}`)}
+    >
+      📄 Download Invoice
+    </button>
+  ) : (
+    <button 
+      className="invoice-action-btn"
+      onClick={() => handleGenerateInvoice(selectedWorkProject._id)}
+    >
+      💳 Generate Invoice
+    </button>
+  )}
+</div>
+
 
                 {selectedWorkProject.payment && (
                   <div className="payment-progress-section">
                     <div className="progress-bar-large">
-                      <div 
+                      <div
                         className="progress-fill-large"
-                        style={{ 
-                          width: `${(selectedWorkProject.payment.paidAmount / selectedWorkProject.payment.finalBudget) * 100}%` 
+                        style={{
+                          width: `${
+                            (selectedWorkProject.payment.paidAmount /
+                              selectedWorkProject.payment.finalBudget) *
+                            100
+                          }%`,
                         }}
                       ></div>
                     </div>
                     <p className="progress-text-large">
-                      {Math.round((selectedWorkProject.payment.paidAmount / selectedWorkProject.payment.finalBudget) * 100)}% Completed
+                      {Math.round(
+                        (selectedWorkProject.payment.paidAmount /
+                          selectedWorkProject.payment.finalBudget) *
+                          100
+                      )}
+                      % Completed
                     </p>
                   </div>
                 )}
@@ -503,7 +640,8 @@ const Dashboard = () => {
                 {/* Admin Commits Section */}
                 <div className="commits-section">
                   <h3>Weekly Progress Updates</h3>
-                  {selectedWorkProject.commits && selectedWorkProject.commits.length > 0 ? (
+                  {selectedWorkProject.commits &&
+                  selectedWorkProject.commits.length > 0 ? (
                     <div className="commits-timeline">
                       {selectedWorkProject.commits
                         .sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -511,29 +649,35 @@ const Dashboard = () => {
                           <div key={idx} className="commit-item">
                             <div className="commit-indicator">
                               <div className="commit-dot"></div>
-                              {idx !== selectedWorkProject.commits.length - 1 && (
+                              {idx !==
+                                selectedWorkProject.commits.length - 1 && (
                                 <div className="commit-line"></div>
                               )}
                             </div>
                             <div className="commit-content">
                               <div className="commit-header">
-                                <span className="commit-week">Week {commit.weekNumber}</span>
+                                <span className="commit-week">
+                                  Week {commit.weekNumber}
+                                </span>
                                 <span className="commit-date">
                                   {new Date(commit.date).toLocaleDateString()}
                                 </span>
                               </div>
                               <div className="commit-body">
                                 <p>{commit.description}</p>
-                                {commit.completedTasks && commit.completedTasks.length > 0 && (
-                                  <div className="commit-tasks">
-                                    <h5>Completed Tasks:</h5>
-                                    <ul>
-                                      {commit.completedTasks.map((task, taskIdx) => (
-                                        <li key={taskIdx}>{task}</li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
+                                {commit.completedTasks &&
+                                  commit.completedTasks.length > 0 && (
+                                    <div className="commit-tasks">
+                                      <h5>Completed Tasks:</h5>
+                                      <ul>
+                                        {commit.completedTasks.map(
+                                          (task, taskIdx) => (
+                                            <li key={taskIdx}>{task}</li>
+                                          )
+                                        )}
+                                      </ul>
+                                    </div>
+                                  )}
                               </div>
                             </div>
                           </div>
@@ -541,43 +685,48 @@ const Dashboard = () => {
                     </div>
                   ) : (
                     <div className="empty-commits">
-                      <p>No progress updates yet. Admin will post weekly updates here.</p>
+                      <p>
+                        No progress updates yet. Admin will post weekly updates
+                        here.
+                      </p>
                     </div>
                   )}
                 </div>
 
-                {selectedWorkProject.payment?.paymentHistory && 
-                 selectedWorkProject.payment.paymentHistory.length > 0 && (
-                  <div className="payment-history-detail">
-                    <h3>Payment History</h3>
-                    <div className="payment-history-table">
-                      {selectedWorkProject.payment.paymentHistory
-                        .sort((a, b) => new Date(b.date) - new Date(a.date))
-                        .map((payment, idx) => (
-                          <div key={idx} className="payment-row">
-                            <div className="payment-col">
-                              <span className="payment-label">Amount</span>
-                              <span className="payment-value-large">
-                                ${payment.amount.toLocaleString()}
-                              </span>
-                            </div>
-                            <div className="payment-col">
-                              <span className="payment-label">Date</span>
-                              <span className="payment-value">
-                                {new Date(payment.date).toLocaleDateString()}
-                              </span>
-                            </div>
-                            {payment.note && (
-                              <div className="payment-col payment-note-col">
-                                <span className="payment-label">Note</span>
-                                <span className="payment-value">{payment.note}</span>
+                {selectedWorkProject.payment?.paymentHistory &&
+                  selectedWorkProject.payment.paymentHistory.length > 0 && (
+                    <div className="payment-history-detail">
+                      <h3>Payment History</h3>
+                      <div className="payment-history-table">
+                        {selectedWorkProject.payment.paymentHistory
+                          .sort((a, b) => new Date(b.date) - new Date(a.date))
+                          .map((payment, idx) => (
+                            <div key={idx} className="payment-row">
+                              <div className="payment-col">
+                                <span className="payment-label">Amount</span>
+                                <span className="payment-value-large">
+                                  ${payment.amount.toLocaleString()}
+                                </span>
                               </div>
-                            )}
-                          </div>
-                        ))}
+                              <div className="payment-col">
+                                <span className="payment-label">Date</span>
+                                <span className="payment-value">
+                                  {new Date(payment.date).toLocaleDateString()}
+                                </span>
+                              </div>
+                              {payment.note && (
+                                <div className="payment-col payment-note-col">
+                                  <span className="payment-label">Note</span>
+                                  <span className="payment-value">
+                                    {payment.note}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
           );
@@ -586,12 +735,14 @@ const Dashboard = () => {
         return (
           <div className="content-section">
             <h2 className="section-title">Work Projects</h2>
-            <p className="section-description">Your accepted projects and their progress</p>
+            <p className="section-description">
+              Your accepted projects and their progress
+            </p>
             {workProjects.length > 0 ? (
               <div className="work-projects-list">
                 {workProjects.map((project) => (
-                  <div 
-                    key={project._id} 
+                  <div
+                    key={project._id}
                     className="work-project-card clickable-card"
                     onClick={() => setSelectedWorkProject(project)}
                   >
@@ -600,8 +751,14 @@ const Dashboard = () => {
                         <h3>{project.projectName}</h3>
                         {project.timeline && (
                           <p className="project-dates">
-                            {project.timeline.startDate && `Started: ${new Date(project.timeline.startDate).toLocaleDateString()}`}
-                            {project.timeline.deadline && ` | Deadline: ${new Date(project.timeline.deadline).toLocaleDateString()}`}
+                            {project.timeline.startDate &&
+                              `Started: ${new Date(
+                                project.timeline.startDate
+                              ).toLocaleDateString()}`}
+                            {project.timeline.deadline &&
+                              ` | Deadline: ${new Date(
+                                project.timeline.deadline
+                              ).toLocaleDateString()}`}
                           </p>
                         )}
                       </div>
@@ -610,35 +767,81 @@ const Dashboard = () => {
                       </span>
                     </div>
                     <p className="project-description">{project.description}</p>
-                    
+
                     {project.payment && (
                       <>
                         <div className="project-financials">
                           <div className="financial-item">
-                            <span className="financial-label">Total Budget</span>
-                            <span className="financial-value">${project.payment.finalBudget?.toLocaleString()}</span>
+                            <span className="financial-label">
+                              Total Budget
+                            </span>
+                            <span className="financial-value">
+                              ${project.payment.finalBudget?.toLocaleString()}
+                            </span>
                           </div>
                           <div className="financial-item">
                             <span className="financial-label">Paid</span>
-                            <span className="financial-value financial-success">${project.payment.paidAmount?.toLocaleString()}</span>
+                            <span className="financial-value financial-success">
+                              ${project.payment.paidAmount?.toLocaleString()}
+                            </span>
                           </div>
                           <div className="financial-item">
                             <span className="financial-label">Remaining</span>
-                            <span className="financial-value financial-warning">${project.payment.dueAmount?.toLocaleString()}</span>
+                            <span className="financial-value financial-warning">
+                              ${project.payment.dueAmount?.toLocaleString()}
+                            </span>
                           </div>
                         </div>
                         <div className="progress-bar">
-                          <div 
+                          <div
                             className="progress-fill"
-                            style={{ width: `${(project.payment.paidAmount / project.payment.finalBudget) * 100}%` }}
+                            style={{
+                              width: `${
+                                (project.payment.paidAmount /
+                                  project.payment.finalBudget) *
+                                100
+                              }%`,
+                            }}
                           ></div>
                         </div>
                         <p className="progress-text">
-                          {Math.round((project.payment.paidAmount / project.payment.finalBudget) * 100)}% paid
+                          {Math.round(
+                            (project.payment.paidAmount /
+                              project.payment.finalBudget) *
+                              100
+                          )}
+                          % paid
                         </p>
                       </>
                     )}
-                    
+                    <div
+                      className="invoice-button-wrapper"
+                      onClick={(e) => e.stopPropagation()} // this prevents opening detail page
+                    >
+                      {invoices[project._id]?.length > 0 ? (
+  <button
+    className="small-btn green-btn"
+    onClick={() =>
+      window.open(
+        `${API_URL}/api/invoices/download/${
+          invoices[project._id][0]._id
+        }`
+      )
+    }
+  >
+    📄 Download Invoice
+  </button>
+) : (
+  <button
+    className="small-btn yellow-btn"
+    onClick={() => handleGenerateInvoice(project._id)}
+    disabled={invoiceLoading[project._id]}
+  >
+    {invoiceLoading[project._id] ? 'Generating...' : 'Generate Invoice'}
+  </button>
+)}
+                    </div>
+
                     <div className="card-hover-indicator">
                       <span>Click to view details →</span>
                     </div>
@@ -648,9 +851,9 @@ const Dashboard = () => {
             ) : (
               <div className="empty-state">
                 <p>No accepted projects yet</p>
-                <button 
+                <button
                   className="cta-btn"
-                  onClick={() => setActiveMenu('new-project')}
+                  onClick={() => setActiveMenu("new-project")}
                 >
                   + Request Your First Project
                 </button>
@@ -659,13 +862,18 @@ const Dashboard = () => {
           </div>
         );
 
-      case 'new-project':
+      case "new-project":
         return (
           <div className="content-section">
             <h2 className="section-title">Request New Project</h2>
-            <p className="section-description">Submit a project request and I'll get back to you</p>
-            
-            <form onSubmit={handleNewProjectSubmit} className="new-project-form">
+            <p className="section-description">
+              Submit a project request and I'll get back to you
+            </p>
+
+            <form
+              onSubmit={handleNewProjectSubmit}
+              className="new-project-form"
+            >
               <div className="form-grid">
                 <div className="form-group">
                   <label htmlFor="projectName">Project Name *</label>
@@ -739,7 +947,9 @@ const Dashboard = () => {
                   placeholder="E.g., React, Node.js, MongoDB, JavaScript"
                   required
                 />
-                <span className="form-hint">Separate multiple tools with commas</span>
+                <span className="form-hint">
+                  Separate multiple tools with commas
+                </span>
               </div>
 
               <div className="form-group full-width">
@@ -756,7 +966,9 @@ const Dashboard = () => {
               </div>
 
               <div className="form-group full-width">
-                <label htmlFor="attachmentLink">Attachment Link (Optional)</label>
+                <label htmlFor="attachmentLink">
+                  Attachment Link (Optional)
+                </label>
                 <input
                   type="url"
                   id="attachmentLink"
@@ -765,7 +977,9 @@ const Dashboard = () => {
                   onChange={handleInputChange}
                   placeholder="https://drive.google.com/... or any reference link"
                 />
-                <span className="form-hint">Link to documents, designs, or requirements</span>
+                <span className="form-hint">
+                  Link to documents, designs, or requirements
+                </span>
               </div>
 
               <button type="submit" className="submit-btn">
@@ -775,12 +989,14 @@ const Dashboard = () => {
           </div>
         );
 
-      case 'requested':
+      case "requested":
         return (
           <div className="content-section">
             <h2 className="section-title">Requested Projects</h2>
-            <p className="section-description">Track your project requests and their status</p>
-            
+            <p className="section-description">
+              Track your project requests and their status
+            </p>
+
             {requestedProjects.length > 0 ? (
               <div className="requested-projects-list">
                 {requestedProjects.map((project) => (
@@ -789,10 +1005,13 @@ const Dashboard = () => {
                       <div>
                         <h3>{project.projectName}</h3>
                         <p className="requested-date">
-                          Submitted: {new Date(project.createdAt).toLocaleDateString()}
+                          Submitted:{" "}
+                          {new Date(project.createdAt).toLocaleDateString()}
                         </p>
                       </div>
-                      <span className={`status-badge status-${project.status.toLowerCase()}`}>
+                      <span
+                        className={`status-badge status-${project.status.toLowerCase()}`}
+                      >
                         {project.status}
                       </span>
                     </div>
@@ -804,38 +1023,56 @@ const Dashboard = () => {
                       </div>
                       <div className="detail-item">
                         <span className="detail-label">Budget:</span>
-                        <span className="detail-value">${project.budget?.toLocaleString()}</span>
+                        <span className="detail-value">
+                          ${project.budget?.toLocaleString()}
+                        </span>
                       </div>
                       <div className="detail-item">
                         <span className="detail-label">Type:</span>
-                        <span className="detail-value">{project.projectType}</span>
+                        <span className="detail-value">
+                          {project.projectType}
+                        </span>
                       </div>
                     </div>
-                    <p className="requested-description">{project.description}</p>
+                    <p className="requested-description">
+                      {project.description}
+                    </p>
 
                     <div className="tools-list">
-                      {project.tools.split(',').map((tool, idx) => (
-                        <span key={idx} className="tool-tag">{tool.trim()}</span>
+                      {project.tools.split(",").map((tool, idx) => (
+                        <span key={idx} className="tool-tag">
+                          {tool.trim()}
+                        </span>
                       ))}
                     </div>
 
                     {project.attachmentLink && (
-                      <a href={project.attachmentLink} target="_blank" rel="noopener noreferrer" className="attachment-link">
+                      <a
+                        href={project.attachmentLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="attachment-link"
+                      >
                         📎 View Attachment
                       </a>
                     )}
 
-                    {project.status === 'negotiable' && project.negotiation && (
+                    {project.status === "negotiable" && project.negotiation && (
                       <div className="negotiation-box">
                         <h4>💬 Admin's Negotiation Proposal</h4>
                         <div className="negotiation-details">
                           <div className="negotiation-item">
                             <span className="label">Proposed Budget:</span>
-                            <span className="value">${project.negotiation.proposedBudget?.toLocaleString()}</span>
+                            <span className="value">
+                              $
+                              {project.negotiation.proposedBudget?.toLocaleString()}
+                            </span>
                           </div>
                           <div className="negotiation-item">
                             <span className="label">Proposed Duration:</span>
-                            <span className="value">{project.negotiation.proposedDuration}</span>
+                            <span className="value">
+                              {project.negotiation.proposedDuration}
+                            </span>
                           </div>
                           {project.negotiation.adminNotes && (
                             <div className="negotiation-notes">
@@ -847,12 +1084,15 @@ const Dashboard = () => {
                       </div>
                     )}
 
-                    {project.status === 'rejected' && project.rejection && (
+                    {project.status === "rejected" && project.rejection && (
                       <div className="rejection-box">
                         <h4>❌ Rejection Reason</h4>
                         <p>{project.rejection.reason}</p>
                         <span className="rejection-date">
-                          Rejected on: {new Date(project.rejection.rejectedAt).toLocaleDateString()}
+                          Rejected on:{" "}
+                          {new Date(
+                            project.rejection.rejectedAt
+                          ).toLocaleDateString()}
                         </span>
                       </div>
                     )}
@@ -862,9 +1102,9 @@ const Dashboard = () => {
             ) : (
               <div className="empty-state">
                 <p>No project requests yet</p>
-                <button 
+                <button
                   className="cta-btn"
-                  onClick={() => setActiveMenu('new-project')}
+                  onClick={() => setActiveMenu("new-project")}
                 >
                   + Request Your First Project
                 </button>
@@ -873,17 +1113,27 @@ const Dashboard = () => {
           </div>
         );
 
-      case 'dashboard':
+      case "dashboard":
         const totalProjects = requestedProjects.length + workProjects.length;
         const acceptedProjects = workProjects.length;
-        const pendingProjects = requestedProjects.filter(p => p.status === 'requested').length;
-        const totalPaid = workProjects.reduce((sum, p) => sum + (p.payment?.paidAmount || 0), 0);
-        const totalDue = workProjects.reduce((sum, p) => sum + (p.payment?.dueAmount || 0), 0);
+        const pendingProjects = requestedProjects.filter(
+          (p) => p.status === "requested"
+        ).length;
+        const totalPaid = workProjects.reduce(
+          (sum, p) => sum + (p.payment?.paidAmount || 0),
+          0
+        );
+        const totalDue = workProjects.reduce(
+          (sum, p) => sum + (p.payment?.dueAmount || 0),
+          0
+        );
 
         return (
           <div className="content-section">
             <h2 className="section-title">Dashboard</h2>
-            <p className="section-description">Overview of your projects and collaboration</p>
+            <p className="section-description">
+              Overview of your projects and collaboration
+            </p>
             <div className="dashboard-grid">
               <div className="stat-card">
                 <div className="stat-icon">📊</div>
@@ -917,7 +1167,9 @@ const Dashboard = () => {
                 <div className="stat-icon">💳</div>
                 <div className="stat-content">
                   <h4>Total Due</h4>
-                  <p className="stat-value stat-warning">${totalDue.toLocaleString()}</p>
+                  <p className="stat-value stat-warning">
+                    ${totalDue.toLocaleString()}
+                  </p>
                 </div>
               </div>
             </div>
@@ -938,41 +1190,54 @@ const Dashboard = () => {
       <div className="sidebar">
         <div className="client-info">
           <div className="client-avatar">
-            {clientInfo?.name?.split(' ').map(n => n[0]).join('') || 'U'}
+            {clientInfo?.name
+              ?.split(" ")
+              .map((n) => n[0])
+              .join("") || "U"}
           </div>
-          <h3 className="client-name">{clientInfo?.name || 'User'}</h3>
-          <p className="client-email">{clientInfo?.email || 'user@example.com'}</p>
-          <p className="client-id">ID: {clientInfo?.userId?.slice(-8) || 'N/A'}</p>
+          <h3 className="client-name">{clientInfo?.name || "User"}</h3>
+          <p className="client-email">
+            {clientInfo?.email || "user@example.com"}
+          </p>
+          <p className="client-id">
+            ID: {clientInfo?.userId?.slice(-8) || "N/A"}
+          </p>
         </div>
 
         <nav className="menu">
           <button
-            className={`menu-item ${activeMenu === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('dashboard')}
+            className={`menu-item ${
+              activeMenu === "dashboard" ? "active" : ""
+            }`}
+            onClick={() => setActiveMenu("dashboard")}
           >
             <span className="menu-icon">📊</span>
             <span>Dashboard</span>
           </button>
-          
+
           <button
-            className={`menu-item ${activeMenu === 'my-projects' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('my-projects')}
+            className={`menu-item ${
+              activeMenu === "my-projects" ? "active" : ""
+            }`}
+            onClick={() => setActiveMenu("my-projects")}
           >
             <span className="menu-icon">📂</span>
             <span>My Projects</span>
           </button>
-          
+
           <button
-            className={`menu-item ${activeMenu === 'profile' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('profile')}
+            className={`menu-item ${activeMenu === "profile" ? "active" : ""}`}
+            onClick={() => setActiveMenu("profile")}
           >
             <span className="menu-icon">👤</span>
             <span>Client Profile</span>
           </button>
-          
+
           <button
-            className={`menu-item ${activeMenu === 'work-projects' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('work-projects')}
+            className={`menu-item ${
+              activeMenu === "work-projects" ? "active" : ""
+            }`}
+            onClick={() => setActiveMenu("work-projects")}
           >
             <span className="menu-icon">💼</span>
             <span>Work Projects</span>
@@ -980,23 +1245,34 @@ const Dashboard = () => {
               <span className="notification-dot green-dot"></span>
             )}
           </button>
-          
+
           <button
-            className={`menu-item ${activeMenu === 'new-project' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('new-project')}
+            className={`menu-item ${
+              activeMenu === "new-project" ? "active" : ""
+            }`}
+            onClick={() => setActiveMenu("new-project")}
           >
             <span className="menu-icon">➕</span>
             <span>New Project</span>
           </button>
-          
+
           <button
-            className={`menu-item ${activeMenu === 'requested' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('requested')}
+            className={`menu-item ${
+              activeMenu === "requested" ? "active" : ""
+            }`}
+            onClick={() => setActiveMenu("requested")}
           >
             <span className="menu-icon">📋</span>
             <span>Requested</span>
-            {(notifications.negotiableProjects > 0 || notifications.rejectedProjects > 0) && (
-              <span className={`notification-dot ${notifications.negotiableProjects > 0 ? 'yellow-dot' : 'red-dot'}`}></span>
+            {(notifications.negotiableProjects > 0 ||
+              notifications.rejectedProjects > 0) && (
+              <span
+                className={`notification-dot ${
+                  notifications.negotiableProjects > 0
+                    ? "yellow-dot"
+                    : "red-dot"
+                }`}
+              ></span>
             )}
           </button>
         </nav>
@@ -1007,9 +1283,7 @@ const Dashboard = () => {
         </button>
       </div>
 
-      <div className="content-area">
-        {renderContent()}
-      </div>
+      <div className="content-area">{renderContent()}</div>
     </div>
   );
 };
