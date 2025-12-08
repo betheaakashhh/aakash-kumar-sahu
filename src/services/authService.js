@@ -53,16 +53,17 @@ export const authService = {
 
   // ADMIN LOGIN - Also uses /api/auth/login but stores in admin storage
   async adminLogin(email, password) {
-    try {
-      console.log('🛡️ Attempting admin login to:', `${API_URL}/login`);
-      
-      const response = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+   try {
+    console.log('🛡️ Attempting admin login to:', `${API_URL}/login`);
+    console.log('📤 Sending credentials:', { email, password }); // ADD THIS LINE
+    
+    const response = await fetch(`${API_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
       console.log('✅ Admin login response status:', response.status);
 

@@ -133,6 +133,12 @@ const Navbar = () => {
               <div className="nav-glow"></div>
             </Link>
           </li>
+          <li className={menu === "Blog" ? "active" : ""}>
+            <Link to="/public-blog" onClick={() => handleNavClick("Blog")}>
+              Blog
+              <div className="nav-glow"></div>
+            </Link>
+          </li>
         </ul>
 
         {/* Mobile Menu Button */}
@@ -195,6 +201,12 @@ const Navbar = () => {
               <li className={menu === "Contact" ? "active" : ""}>
                 <Link to="/contact" onClick={() => handleNavClick("Contact")}>
                   <span className="nav-text">Contact</span>
+                  <div className="mobile-glow"></div>
+                </Link>
+              </li>
+              <li className={menu === "Blog" ? "active" : ""}>
+                <Link to="/public-blog" onClick={() => handleNavClick("Blog")}>
+                  <span className="nav-text">Blog</span>
                   <div className="mobile-glow"></div>
                 </Link>
               </li>

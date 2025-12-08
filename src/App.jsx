@@ -20,6 +20,9 @@ import ProtectedRoute, {
   AdminPublicRoute 
 } from './Components/ProtectedRoute.jsx'
 
+import Blog from './Components/BlogPost/Blog.jsx'
+import BlogAdmin from './pages/AdminSide/BlogAdmin.jsx'
+
 
 function App() {
   return (
@@ -29,6 +32,10 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/about' element={<About />} />
         <Route path='/contact' element={<Contact />} />
+        <Route path='/public-blog' element={<Blog />} />
+        <Route path="/public-blog/:slug" element={<Blog />} />
+        
+
         
         {/* Client Auth Routes - Redirect to dashboard if already logged in */}
         <Route 
@@ -90,6 +97,8 @@ function App() {
             </AdminProtectedRoute>
           } 
         />
+        <Route path="/admin/blogs" element={<AdminProtectedRoute> <BlogAdmin /> </AdminProtectedRoute>} />
+
 
         {/* ============= OTHER ROUTES ============= */}
         {/* <Route path='/forgot-password' element={<ForgotPassword />} /> */}
