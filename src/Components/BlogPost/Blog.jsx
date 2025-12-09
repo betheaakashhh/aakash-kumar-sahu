@@ -114,7 +114,7 @@ function Blog() {
       ) : (
         <div className="blog-main-container">
           <div className="blog-header">
-            <h1 className="blog-title">Blog</h1>
+            <h1 className="blog-title"><span>Blog Post</span></h1>
             <p className="blog-subtitle">Explore our latest articles and insights</p>
           </div>
 
