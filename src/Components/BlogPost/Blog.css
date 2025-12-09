@@ -40,6 +40,51 @@
   margin: 0;
 }
 
+/*search control*/
+
+
+.search-box-blog {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+  margin-bottom: 2rem;
+}
+
+.search-box-blog {
+  flex: 1;
+  min-width: 250px;
+}
+
+.search-box-blog:focus-within {
+  border-color: #888a90ff;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.search-icon-blog {
+  width: 20px;
+  height: 20px;
+  color: #94a3b8;
+  stroke-width: 2;
+}
+
+.search-box-blog input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: #091524ff;
+  background: transparent;
+}
+
+.search-box-blog input::placeholder {
+  color: #94a3b8;
+}
+
 /* Tag Filter Container */
 .tag-filter-container {
   margin-bottom: 40px;

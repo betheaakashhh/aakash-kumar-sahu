@@ -1,0 +1,31 @@
+.footer {
+  width: 100%;
+  padding: 20px 10px;
+  text-align: center;
+  background: #f5f7fa; /* Dark theme look */
+  color: #060e15ff;
+  margin-top: 40px;
+  border-top: 1px solid #dcdce3ff;
+}
+
+.footer-nav {
+  margin-bottom: 10px;
+}
+
+.footer-link {
+  margin: 0 15px;
+  color: #04080cff;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s ease-in-out;
+}
+
+.footer-link:hover {
+  color: #0f57aaff;
+  text-decoration: underline;
+}
+
+.footer-copy {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import BlogFeed from './BlogFeed/BlogFeed';
 import BlogDetail from './BlogDetails/BlogDetail';
 import './Blog.css';
+import Footer from '../Footer/Footer';
 
 function Blog() {
   const [selectedBlog, setSelectedBlog] = useState(null);
@@ -12,6 +13,7 @@ function Blog() {
   const [filteredBlogs, setFilteredBlogs] = useState([]);
   const [selectedTag, setSelectedTag] = useState('all');
   const [allTags, setAllTags] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const { slug } = useParams();
 
   useEffect(() => {
@@ -24,6 +26,27 @@ function Blog() {
       fetchBlogs();
     }
   }, [slug]);
+  useEffect(() => {
+  let updatedBlogs = blogs;
+
+  // Apply Tag Filter
+  if (selectedTag !== 'all') {
+    updatedBlogs = updatedBlogs.filter(blog =>
+      blog.tags && blog.tags.includes(selectedTag)
+    );
+  }
+
+  // Apply Search Filter
+  if (searchQuery.trim() !== '') {
+    updatedBlogs = updatedBlogs.filter(blog =>
+      blog.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+
+  setFilteredBlogs(updatedBlogs);
+}, [blogs, selectedTag, searchQuery]);
+
+//API BACKEND 
 
   const API_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
 
@@ -103,6 +126,7 @@ function Blog() {
     );
   }
 
+
   return (
     <div className="blog-app">
       {isDetailOpen && selectedBlog ? (
@@ -116,7 +140,22 @@ function Blog() {
           <div className="blog-header">
             <h1 className="blog-title"><span>Blog Post</span></h1>
             <p className="blog-subtitle">Explore our latest articles and insights</p>
+            
           </div>
+            {/* Search Input */}
+<div className="search-box-blog">
+  <svg className="search-icon-blog" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  </svg>
+  <input
+    type="text"
+    placeholder="Search posts..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
+</div>
+
 
           {allTags.length > 1 && (
             <div className="tag-filter-container">
@@ -134,7 +173,9 @@ function Blog() {
                   ))}
                 </div>
               </div>
+              
             </div>
+            
           )}
 
           {filteredBlogs.length === 0 ? (
@@ -152,7 +193,9 @@ function Blog() {
           )}
         </div>
       )}
+      <Footer />
     </div>
+  
   );
 }
 
