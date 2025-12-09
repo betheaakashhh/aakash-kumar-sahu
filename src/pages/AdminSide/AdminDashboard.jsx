@@ -2,10 +2,14 @@ import React, { useState, useEffect } from "react";
 import "./admin.css";
 import ResumeManager from "../../Components/Resume/ResumeManager";
 
+
+import { useNavigate } from "react-router-dom";
+
 const AdminDashboard = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [adminInfo, setAdminInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLoading , setIsLoading] = useState(false);
 
   // States
   const [dashboardStats, setDashboardStats] = useState({});
@@ -14,6 +18,7 @@ const AdminDashboard = () => {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [negotiableProjects, setNegotiableProjects] = useState([]);
+  const navigate = useNavigate()
 
   // Form states
   const [negotiationForm, setNegotiationForm] = useState({
@@ -585,6 +590,14 @@ const handleMarkInvoiceAsPaid = async (projectId, invoiceNumber) => {
       completedTasks: newTasks.length > 0 ? newTasks : [""],
     });
   };
+  const handleBlogAdmin = () =>{
+    console.log("Redirecting to BlogAdminSection");
+    setIsLoading(true);
+    navigate('/admin/blogs');
+
+    setTimeout(() => setIsLoading(false), 800);
+
+  }
 
   const renderContent = () => {
     switch (activeMenu) {
@@ -1804,11 +1817,12 @@ const handleMarkInvoiceAsPaid = async (projectId, invoiceNumber) => {
             </div>
           </div>
         );
-        case "resume" :
-           return <ResumeManager />
+    case "resume":
+      return <ResumeManager />;
 
-      default:
-        return null;
+    
+    default:
+      return null;
     }
   };
 
@@ -1908,6 +1922,21 @@ const handleMarkInvoiceAsPaid = async (projectId, invoiceNumber) => {
           >
             
             <span>Resume</span>
+          </button>
+       <button
+            className={`admin-a-s-resume ${
+              activeMenu === "Blog" ? "admin-a-s-active" : ""
+            }`}
+            onClick={handleBlogAdmin}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="spinner"> </span>
+            ): (
+              "Blog Manager"
+            )}
+            
+            
           </button>
         <button className="admin-a-s-logout-btn" onClick={handleLogout}>
           <span className="admin-a-s-menu-icon"></span>

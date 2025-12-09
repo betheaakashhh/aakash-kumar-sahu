@@ -2380,6 +2380,28 @@ body {
   }
 }
 
+/*===========spinner===================*/
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top: 2px solid transparent;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.admin-a-s-resume:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
 /* ==================== Resume Overrides ==================== */
 .admin-a-s-resume{
    display: flex;
