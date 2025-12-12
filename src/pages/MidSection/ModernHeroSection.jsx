@@ -6,6 +6,7 @@ const ModernHeroSection = () => {
   const [currentCareerSlide, setCurrentCareerSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  
 
   const menuOptions = ["vision", "Skills & Technologies", "career", "Projects", "social"];
 

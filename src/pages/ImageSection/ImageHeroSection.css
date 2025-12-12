@@ -169,6 +169,92 @@ background: -webkit-linear-gradient(360deg, hsla(0, 0%, 8%, 1) 0%, hsla(240, 5%,
     opacity: 1;
   }
 }
+.typing-code-box {
+  width: 100%;
+  height: 200px;
+  background: rgba(255, 255, 255, 0);
+  border-radius: 12px;
+  padding: 12px;
+  backdrop-filter: blur(6px);
+  color: #00eaff;
+  font-family: "Fira Code", monospace;
+  font-size: 13px;
+  overflow: hidden;
+  position: relative;
+  
+}
+
+/* Blinking cursor */
+.typing-code::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: #00eaff;
+  margin-left: 4px;
+  animation: blink 0.6s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/*========================html dangeruously ======================*/
+
+
+.typing-code-box {
+  font-family: "Fira Code", monospace;
+  font-size: 13px;
+  color: #e0e0e0;
+  white-space: pre-wrap;
+  line-height: 1.4;
+  position: relative;
+}
+
+/* Syntax colors */
+.code-comment {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.code-string {
+  color: #ce9178;
+}
+
+.code-keyword {
+  color: #569cd6;
+  font-weight: 500;
+}
+
+.code-number {
+  color: #b5cea8;
+}
+
+.code-tag {
+  color: #d7ba7d;
+}
+
+.code-sql {
+  color: #c586c0;
+  font-weight: 600;
+}
+
+/* Cursor */
+.typing-code-box::after {
+  content: "";
+  width: 8px;
+  height: 16px;
+  background: #00eaff;
+  display: inline-block;
+  margin-left: 3px;
+  animation: blink 0.6s infinite;
+}
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
 
 /* ==================== FLOATING IMAGES CONTAINER ==================== */
 
@@ -348,6 +434,116 @@ background: -webkit-linear-gradient(360deg, hsla(0, 0%, 8%, 1) 0%, hsla(240, 5%,
     transform: translate(10px, -10px);
     opacity: 0.7;
   }
+}
+
+
+/*=======================brainline animation============================*/
+.brainwave-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background: 
+    repeating-linear-gradient(
+      120deg,
+      rgba(4, 5, 5, 0.94),
+      rgba(243, 247, 246, 0.05) 2px,
+      transparent 3px,
+      transparent 8px
+    );
+  animation: waveMove 12s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes waveMove {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/*=======================Rotatinglight bulb animation============================*/
+.rotating-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 3.5rem;
+  transform: translate(-50%, -50%);
+  animation: rotateGlow 6s linear infinite;
+  z-index: 3;
+}
+
+@keyframes rotateGlow {
+  0% {
+    
+    text-shadow: 0 0 10px #ffcb47;
+  }
+  50% {
+    text-shadow: 0 0 25px #ffd56a;
+  }
+  100% {
+   
+    text-shadow: 0 0 10px #ffcb47;
+  }
+}
+
+/*=======================vertical text  animation============================*/
+.vertical-code-stream {
+  position: absolute;
+  left: 10px;
+  top: 0;
+  height: 100%;
+  width: 40%;
+  overflow: hidden;
+  opacity: 0.35;
+  z-index: 1;
+}
+
+.vertical-code-stream pre {
+  color: #00f5ff;
+  font-family: "Fira Code";
+  font-size: 13px;
+  line-height: 1.4;
+  animation: scrollCode 10s linear infinite;
+  white-space: pre-wrap;
+}
+
+@keyframes scrollCode {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(-100%); }
+}
+
+
+/* ==================== achievnement TEXT ELEMENTS ==================== */
+.achievement-badges {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 4;
+}
+
+.badge {
+  opacity: 0;
+  font-size: 0.9rem;
+  color: #fff;
+  animation: badgeFade 10s infinite;
+}
+
+.badge:nth-child(1) { animation-delay: 0s; }
+.badge:nth-child(2) { animation-delay: 2s; }
+.badge:nth-child(3) { animation-delay: 4s; }
+.badge:nth-child(4) { animation-delay: 6s; }
+.badge:nth-child(5) { animation-delay: 8s; }
+
+@keyframes badgeFade {
+  0% { opacity: 0; transform: translateY(5px); }
+  10% { opacity: 1; transform: translateY(0); }
+  20% { opacity: 1; }
+  30% { opacity: 0; transform: translateY(-5px); }
+  100% { opacity: 0; }
 }
 
 /* ==================== FLOATING TEXT ELEMENTS ==================== */
