@@ -7,7 +7,7 @@ const ModernHeroSection = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const menuOptions = ["vision", "Skills & Technologies", "career", "donation", "social"];
+  const menuOptions = ["vision", "Skills & Technologies", "career", "Projects", "social"];
 
   // Check screen size for mobile responsiveness
   useEffect(() => {
@@ -100,12 +100,40 @@ const ModernHeroSection = () => {
     }
   ];
 
+  const projectSlides = [
+  {
+    title: "Portfolio Website",
+    image: "/images/Portfolio.png",
+    description: "A modern portfolio built with React, animations, and responsive UI.",
+    link: "https://aakash-kumar-sahu-portfolio.vercel.app"
+  },
+  {
+    title: "Confession App",
+    image: "/images/Sincut.png",
+    description: "A full-stack anonymous confession app using MERN stack.",
+    link: "https://sincut.vercel.app"
+  },
+  {
+    title: "E-Commerce UI",
+    image: "/images/Sincut.png",
+    description: "Beautiful UI/UX for a complete e-commerce shopping interface.",
+    link: "https://your-ecommerce-ui.com"
+  }
+];
+
   const nextCareerSlide = () => {
     setCurrentCareerSlide((prev) => (prev + 1) % careerSlides.length);
   };
 
   const prevCareerSlide = () => {
     setCurrentCareerSlide((prev) => (prev - 1 + careerSlides.length) % careerSlides.length);
+  };
+  const nextProjectSlide = () => {
+    setCurrentCareerSlide((prev) => (prev + 1) % projectSlides.length);
+  };
+
+  const prevProjectSlide = () => {
+    setCurrentCareerSlide((prev) => (prev - 1 + projectSlides.length) % projectSlides.length);
   };
 
   const handleSectionChange = (section) => {
@@ -115,13 +143,7 @@ const ModernHeroSection = () => {
     }
   };
 
-  const handleDonate = (amount = null) => {
-    if (amount) {
-      alert(`Thank you for your donation of $${amount}!`);
-    } else {
-      alert("Redirecting to donation page...");
-    }
-  };
+  
 
   const handleReferFriend = (personName) => {
     alert(`Referral initiated for ${personName}! Share this amazing opportunity with your friends.`);
@@ -140,7 +162,7 @@ const ModernHeroSection = () => {
       case 'vision': return '🔮';
       case 'Skills & Technologies': return '👑';
       case 'career': return '💼';
-      case 'donation': return '❤️';
+      case 'Projects': return '❤️';
       case 'social': return '👥';
       default: return '⭐';
     }
@@ -323,66 +345,69 @@ const ModernHeroSection = () => {
             )}
 
             {/* Donation Section */}
-            {activeSection === "donation" && (
-              <div className="modern-content-slide">
-                <div className="modern-glassy-card donation-card">
-                  <h2 className="modern-content-title">
-                    Make a <span className="modern-gradient-text">Difference</span>
-                  </h2>
-                  <p className="modern-section-subtitle">
-                    Your support fuels innovation and creates lasting impact in communities worldwide
-                  </p>
-                  <div className="modern-donation-content">
-                    <div className="modern-donation-text">
-                      <p>Every contribution helps us push the boundaries of what's possible and create solutions that matter.</p>
-                      <div className="modern-impact-stats">
-                        <div className="modern-stat">
-                          <span className="modern-stat-number">50K+</span>
-                          <span className="modern-stat-label">Lives Impacted</span>
-                        </div>
-                        <div className="modern-stat">
-                          <span className="modern-stat-number">100+</span>
-                          <span className="modern-stat-label">Projects Funded</span>
-                        </div>
-                        <div className="modern-stat">
-                          <span className="modern-stat-number">25+</span>
-                          <span className="modern-stat-label">Countries Reached</span>
-                        </div>
-                      </div>
-                      
-                      <div className="modern-quick-donate">
-                        <h4>Quick Donate</h4>
-                        <div className="modern-donate-amounts">
-                          {[25, 50, 100, 250].map(amount => (
-                            <button
-                              key={amount}
-                              className="modern-donate-amount-btn"
-                              onClick={() => handleDonate(amount)}
-                            >
-                              ${amount}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="modern-donation-actions">
-                      <button 
-                        className="modern-donate-btn modern-donate-primary"
-                        onClick={() => handleDonate()}
-                      >
-                        💝 Donate Now
-                      </button>
-                      <button 
-                        className="modern-donate-btn modern-donate-secondary"
-                        onClick={() => handleSectionChange('vision')}
-                      >
-                        Learn About Impact
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            {activeSection === "Projects"&& (
+  <div className="modern-content-slide">
+    <div className="modern-glassy-card career-card">
+      
+      <h2 className="modern-content-title">
+        <span className="modern-gradient-text">Project</span> Overview
+      </h2>
+      <p className="modern-section-subtitle">
+        Showcasing some of my best work
+      </p>
+
+      <div className="modern-career-slider">
+
+        <div className="modern-slide-container">
+          <div className="modern-slide-content">
+
+            <img 
+              src={projectSlides[currentCareerSlide].image} 
+              alt={projectSlides[currentCareerSlide].title} 
+              className="project-slide-image"
+            />
+
+            <h3>{projectSlides[currentCareerSlide].title}</h3>
+            <p>{projectSlides[currentCareerSlide].description}</p>
+
+            <div className="modern-job-meta">
+              <span className="modern-slide-count">
+                {currentCareerSlide + 1} / {projectSlides.length}
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Slider Controls */}
+        <div className="modern-slider-controls">
+          <button className="modern-slider-btn" onClick={prevProjectSlide}>← Previous</button>
+
+          <div className="modern-slider-dots">
+            {projectSlides.map((_, index) => (
+              <span
+                key={index}
+                className={`modern-dot ${index === currentCareerSlide ? 'active' : ''}`}
+                onClick={() => setCurrentCareerSlide(index)}
+              ></span>
+            ))}
+          </div>
+
+          <button className="modern-slider-btn" onClick={nextProjectSlide}>Next →</button>
+        </div>
+
+        {/* Preview Button */}
+        <button 
+          className="modern-apply-btn"
+          onClick={() => window.open(projectSlides[currentCareerSlide].link, "_blank")}
+        >
+          🔍 Preview
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
 
             {/* People Section */}
            {activeSection === "social" && (
