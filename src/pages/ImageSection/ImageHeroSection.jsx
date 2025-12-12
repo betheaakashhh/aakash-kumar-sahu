@@ -56,7 +56,6 @@ WHERE status = 'active'
 ORDER BY created_at DESC
 LIMIT 10;
 
--- Insert Sample Data
 INSERT INTO users (name, email, status)
 VALUES ('Aakash', 'aakash@example.com', 'active');`,
 
@@ -97,7 +96,6 @@ db.orders.aggregate([
     }
   }, [typedCode, isTyping, currentSnippet]);
 
-  // Backspace + next snippet
   React.useEffect(() => {
     if (isTyping) return;
 
@@ -112,8 +110,8 @@ db.orders.aggregate([
     }
   }, [isTyping, typedCode]);
 
-  // Syntax highlighter helpers
-  const escapeHTML = (str) => str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const escapeHTML = (str) =>
+    str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   const highlightCode = (code) => {
     code = code
@@ -148,70 +146,46 @@ db.orders.aggregate([
 
   return (
     <div className="modern-dark-section">
-      {/* Background */}
       <div className="modern-dark-background">
-        <div className="floating-orb orb-1"></div>
-        <div className="floating-orb orb-2"></div>
-        <div className="floating-orb orb-3"></div>
+        <div className="floating-orb orb-1" />
+        <div className="floating-orb orb-2" />
+        <div className="floating-orb orb-3" />
       </div>
 
-      {/* Content */}
       <div className="content-container">
-        {/* Header */}
         <div className="text-animation-container">
           <h2 className="animated-heading">
             <span className="title-gradient">Aakash Kumar Sahu</span>
           </h2>
           <p className="animated-subtitle">
-            Computer Science Engineer | Aspiring Software Development Engineer |
-            Web Development Specialist
+            Computer Science Engineer | Aspiring SDE | Web Development Specialist
           </p>
           <p className="animated-description">
-            Committed to Technical Excellence and Continuous Growth.
-            Specializing in full-stack development, problem-solving, and
-            scalable systems.
+            Committed to excellence, problem-solving, and continuous learning.
           </p>
         </div>
 
-        {/* 3 Cards */}
         <div className="images-container">
+
           {/* Card 1 */}
           <div className="image-wrapper image-1">
             <div className="glassy-image">
-              <div className="image-content continuous-learner">
-                 <div className="brainwave-lines"></div>
-                 <div className="vertical-code-stream">
-                  
-                  <pre>
-                    {`function improve() {
-  return learn() + practice() + consistency;
-}
-
-const skills = ["DSA", "System Design", "Web Dev", "AI"];
-skills.forEach(grow);`}
-                  </pre>
-                </div>
-                <div className="image-overlay">
-                  
-                  
-                </div>
+              <div className="image-content">
+                <div className="image-overlay" />
                 <div className="image-text">
                   <h3>Full-Stack Development</h3>
-                  <p>Building end-to-end solutions with modern frameworks</p>
+                  <p>Building robust & modern web solutions</p>
                 </div>
               </div>
             </div>
-            <div className="floating-dots"></div>
+            <div className="floating-dots" />
           </div>
 
           {/* Card 2 */}
           <div className="image-wrapper image-2">
             <div className="glassy-image">
               <div className="image-content">
-              
-                <div className="image-overlay">
-                   <div className="brainwave-lines"></div>
-                </div>
+                <div className="image-overlay" />
 
                 <div
                   className="typing-code-box"
@@ -222,34 +196,34 @@ skills.forEach(grow);`}
 
                 <div className="image-text">
                   <h3>Clean Code Advocate</h3>
-                  <p>Writing maintainable, scalable, and efficient code</p>
+                  <p>Prioritizing clarity, readability & efficiency</p>
                 </div>
               </div>
             </div>
-            <div className="floating-dots"></div>
+            <div className="floating-dots" />
           </div>
 
-          {/* Card 3 — Continuous Learner */}
+          {/* Card 3 */}
           <div className="image-wrapper image-3">
             <div className="glassy-image">
               <div className="image-content continuous-learner">
-                 <div className="brainwave-lines"></div>
+
+                <div className="brainwave-lines"></div>
                 <div className="rotating-icon">💡</div>
 
                 <div className="image-overlay"></div>
 
                 <div className="image-text">
                   <h3>Continuous Learner</h3>
-                  <p>Adapting, evolving, and growing with every challenge.</p>
+                  <p>Growing every day through curiosity & exploration.</p>
                 </div>
+
               </div>
             </div>
-
-            <div className="floating-dots"></div>
+            <div className="floating-dots" />
           </div>
         </div>
 
-        {/* Floating Words */}
         <div className="floating-text-elements">
           <div className="floating-text text-1">Innovate</div>
           <div className="floating-text text-2">Engineer</div>
