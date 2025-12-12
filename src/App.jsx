@@ -22,11 +22,14 @@ import ProtectedRoute, {
 
 import Blog from './Components/BlogPost/Blog.jsx'
 import BlogAdmin from './pages/AdminSide/BlogAdmin.jsx'
+import AdminUpdatePanel from './Components/UpdateInfo/AdminUpdatePanel.jsx'
+import UpdateNotification from './Components/UpdateInfo/UpdateNotification.jsx'
 
 
 function App() {
   return (
     <div className="App">
+      <UpdateNotification />
       <Routes>
         {/* ============= PUBLIC ROUTES ============= */}
         <Route path='/' element={<Home />} />
@@ -98,6 +101,7 @@ function App() {
           } 
         />
         <Route path="/admin/blogs" element={<AdminProtectedRoute> <BlogAdmin /> </AdminProtectedRoute>} />
+        <Route path="/admin/update-panel" element={<AdminProtectedRoute><AdminUpdatePanel/> </AdminProtectedRoute>} />
 
 
         {/* ============= OTHER ROUTES ============= */}

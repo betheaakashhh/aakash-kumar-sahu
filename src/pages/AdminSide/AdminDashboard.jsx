@@ -4,6 +4,7 @@ import ResumeManager from "../../Components/Resume/ResumeManager";
 
 
 import { useNavigate } from "react-router-dom";
+import AdminUpdatePanel from "../../Components/UpdateInfo/AdminUpdatePanel";
 
 const AdminDashboard = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
@@ -1819,7 +1820,8 @@ const handleMarkInvoiceAsPaid = async (projectId, invoiceNumber) => {
         );
     case "resume":
       return <ResumeManager />;
-
+    case "Updates":
+      return <AdminUpdatePanel />;
     
     default:
       return null;
@@ -1934,6 +1936,21 @@ const handleMarkInvoiceAsPaid = async (projectId, invoiceNumber) => {
               <span className="spinner"> </span>
             ): (
               "Blog Manager"
+            )}
+            
+            
+          </button>
+       <button
+            className={`admin-a-s-resume ${
+              activeMenu === "Updates" ? "admin-a-s-active" : ""
+            }`}
+            onClick={()=> setActiveMenu("Updates")}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="spinner"> </span>
+            ): (
+              "Updating is fetching..."
             )}
             
             

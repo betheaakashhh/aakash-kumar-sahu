@@ -10,6 +10,7 @@ const Footer = () => {
         <Link to="/contact" className="footer-link">Contact</Link>
         <Link to="/public-blog" className="footer-link">Blog</Link>
         <Link to="/resume" className="footer-link">Resume</Link>
+        <Link to="/about" className="footer-link">About</Link>
       </nav>
 
       <p className="footer-copy">

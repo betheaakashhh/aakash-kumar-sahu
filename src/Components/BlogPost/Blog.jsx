@@ -5,6 +5,8 @@ import BlogDetail from './BlogDetails/BlogDetail';
 import './Blog.css';
 import Footer from '../Footer/Footer';
 
+
+
 function Blog() {
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -129,6 +131,7 @@ function Blog() {
 
   return (
     <div className="blog-app">
+   
       {isDetailOpen && selectedBlog ? (
         <BlogDetail 
           blog={selectedBlog} 

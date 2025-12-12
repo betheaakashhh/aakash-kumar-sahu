@@ -1,0 +1,38 @@
+.update-container {
+  width: 100%;
+  
+}
+
+.update-box {
+  position: relative;
+  padding: 15px;
+
+  
+  color: #fff;
+  animation: fadeIn 0.3s ease;
+}
+
+.update-box.low { background: #77fa77ff; }
+.update-box.medium { background: #fd9c0aff; }
+.update-box.high { background: #ff615fff; }
+
+.update-box p {
+  margin: 5px 0 0;
+  opacity: 0.9;
+}
+
+.close-btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  color: white;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

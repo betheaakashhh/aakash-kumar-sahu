@@ -55,7 +55,8 @@ const ResumePage = () => {
         minHeight: '100vh',
         fontFamily: '"Times New Roman", Times, serif',
         fontSize: '18px',
-        color: '#333'
+        color: '#ffffffff',
+        
       }}>
         Loading resume...
       </div>
