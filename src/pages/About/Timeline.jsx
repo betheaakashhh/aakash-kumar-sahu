@@ -82,7 +82,7 @@ const Timeline = () => {
         cgpa: '8.5/10',
         startYear: '2023',
         expectedGraduation: '2027',
-        collegeWebsite: 'https://www.ssrgi.ac.in/',
+        collegeWebsite: 'http://rsrrcet.com/rsrrcet.php',
         location: 'Bhilai, Chhattisgarh, India',
         coursework: [
           'Data Structures & Algorithms',
