@@ -69,19 +69,19 @@ const Timeline = () => {
       }
     },
     { 
-      year: '2022', 
+      year: '2023', 
       title: 'Started B.Tech', 
       org: 'RSRRCET, Bhilai', 
       desc: 'Computer Science & Engineering journey began',
       type: 'education',
       details: {
-        collegeName: 'Rungta Shri Ramswaroop Ram College of Engineering & Technology',
+        collegeName: 'RSR Rungta College of Engineering & Technology',
         degree: 'Bachelor of Technology (B.Tech)',
         branch: 'Computer Science & Engineering',
-        currentSemester: '6th Semester',
+        currentSemester: '5th Semester',
         cgpa: '8.5/10',
-        startYear: '2022',
-        expectedGraduation: '2026',
+        startYear: '2023',
+        expectedGraduation: '2027',
         collegeWebsite: 'https://www.ssrgi.ac.in/',
         location: 'Bhilai, Chhattisgarh, India',
         coursework: [
@@ -97,13 +97,13 @@ const Timeline = () => {
         achievements: [
           'Department Rank 3 in 2nd Year',
           'Won Smart India Hackathon 2023',
-          'Published paper in IEEE conference',
-          'Tech Club President 2023-24'
+         
+          
         ],
         activities: [
           'Member of Coding Club',
-          'Volunteer at National Service Scheme (NSS)',
-          'Organized TechFest 2023'
+         
+          
         ]
       }
     },
