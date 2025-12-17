@@ -153,17 +153,7 @@ db.orders.aggregate([
       </div>
 
       <div className="content-container">
-        <div className="text-animation-container">
-          <h2 className="animated-heading">
-            <span className="title-gradient">Aakash Kumar Sahu</span>
-          </h2>
-          <p className="animated-subtitle">
-            Computer Science Engineer | Aspiring SDE | Web Development Specialist
-          </p>
-          <p className="animated-description">
-            Committed to excellence, problem-solving, and continuous learning.
-          </p>
-        </div>
+      
 
         <div className="images-container">
 
