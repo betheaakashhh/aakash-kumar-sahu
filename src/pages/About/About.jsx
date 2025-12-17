@@ -4,7 +4,9 @@ import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Code, Zap, Target, Sparkles, Download, Mail, Github, Linkedin, Twitter } from 'lucide-react';
-import Timeline from './Timeline'; // Import your Timeline component
+import Timeline from './Timeline'; 
+import Navbar from "../Navbar/Navbar";
+
 import './about.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -138,9 +140,13 @@ const About = () => {
   const handleDownload = () =>{
     navigate("/resume");
   }
+  const handleGetInTouch = () =>{
+    navigate("/contact");
+  }
 
   return (
     <div className="as-abt-container">
+        <Navbar />
       {/* Hero Section */}
       <motion.section 
         ref={heroRef}
@@ -186,7 +192,7 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.6 }}
           >
-            <button className="as-abt-btn-primary">
+            <button className="as-abt-btn-primary" onClick={handleGetInTouch}>
               <Mail size={20} />
               Get In Touch
             </button>

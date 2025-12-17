@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Github, Linkedin, Award, Calendar, Building, BookOpen, GraduationCap, LinkIcon } from 'lucide-react';
-
+import { Assets, CertificatePreview } from './Assets.jsx';
 const Timeline = () => {
  
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [selectedItem, setSelectedItem] = useState(null);
   const [detailType, setDetailType] = useState(null);
+  const [previewCert, setPreviewCert] = useState(null);
   const contentRef = useRef(null);
   
   const hackingSequence = [
@@ -21,6 +22,7 @@ const Timeline = () => {
     { 
       year: '2024', 
       title: 'Technical Intern', 
+      certId: 'iit-bhubaneswar-2024',
       org: 'IIT Bhubaneswar', 
       desc: 'Advanced research in cutting-edge technologies',
       type: 'internship',
@@ -221,7 +223,7 @@ const Timeline = () => {
                   fontSize: 'clamp(2rem, 5vw, 3rem)',
                   marginBottom: '40px',
                   textAlign: 'center',
-                  background: 'linear-gradient(90deg, #0ff, #00ff88)',
+                  background: 'linear-gradient(90deg, rgba(40, 60, 60, 1), #00ff88)',
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent'
@@ -530,30 +532,45 @@ const Timeline = () => {
                   )}
 
                   <div style={{ marginBottom: '30px' }}>
-                    <h3 style={{ fontSize: '1.3rem', color: '#0ff', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Award size={20} /> Certificate
-                    </h3>
-                    <a 
-                      href={selectedItem.details.certificate}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '12px 24px',
-                        background: 'rgba(0, 255, 255, 0.1)',
-                        border: '1px solid rgba(0, 255, 255, 0.3)',
-                        borderRadius: '8px',
-                        color: '#0ff',
-                        textDecoration: 'none',
-                        transition: 'all 0.3s'
-                      }}
-                    >
-                      <ExternalLink size={18} />
-                      View Certificate
-                    </a>
-                  </div>
+  <h3 style={{ fontSize: '1.3rem', color: '#0ff', marginBottom: '15px' }}>
+    Certificate
+  </h3>
+
+  <button
+    onClick={() => {
+      const cert = Assets.getCertificate(selectedItem.certId);
+      setPreviewCert(prev =>
+        prev?.id === cert?.id ? null : cert
+      );
+    }}
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '12px 24px',
+      background: previewCert
+        ? 'rgba(255,0,0,0.2)'
+        : 'rgba(0,255,255,0.2)',
+      border: previewCert
+        ? '1px solid rgba(255,0,0,0.5)'
+        : '1px solid rgba(0,255,255,0.5)',
+      borderRadius: '8px',
+      color: previewCert ? '#ff0000' : '#0ff',
+      cursor: 'pointer',
+      fontWeight: 600
+    }}
+  >
+    {previewCert ? '✕ Hide Certificate' : 'View Certificate'}
+  </button>
+
+  {/* 👇 Inline Preview */}
+  {previewCert && (
+    <CertificatePreview
+      certificate={previewCert}
+      onClose={() => setPreviewCert(null)}
+    />
+  )}
+</div>
 
                   <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                     <a 

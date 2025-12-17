@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Navbar from '../Navbar/Navbar';
 
 
 const API_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5000';
@@ -82,10 +83,11 @@ const ResumePage = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#f5f5f5',
+      backgroundColor: '#201f1fff',
       paddingBottom: '40px',
       
     }}>
+      <Navbar />
       {/* Action Buttons */}
     
 
