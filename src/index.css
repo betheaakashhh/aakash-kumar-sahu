@@ -12,7 +12,7 @@ body{
   font-family: 'Poppins', sans-serif;
   min-height: 100vh;
   background: #080808;
-  color: #333;
+  color: #f5f5f5;
   overflow-x: hidden;
 
 }
@@ -51,4 +51,94 @@ body:hover::-webkit-scrollbar {
 }
 ::-webkit-scrollbar {
   width: 8px;
+}
+
+body {
+  background: #111;
+  color: white;
+  cursor: none;
+  font-family: sans-serif;
+}
+
+/* Cursor */
+.custom-cursor {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 99999;
+
+  /* MAGIC */
+  mix-blend-mode: difference;
+}
+
+/* Hover text */
+.hover-text {
+  font-size: 4rem;
+  margin: 150px;
+}
+.hover-text span {
+  border-bottom: 2px solid white;
+  cursor: pointer;
+}
+.hover-text span:hover {
+  color: #ff6347;
+}
+
+
+
+/* Cursor */
+.cursor {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  background: white;
+  mix-blend-mode: difference;
+  filter: url(#noise);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cursor-text {
+  font-size: 12px;
+  font-weight: bold;
+  color: black;
+  text-transform: uppercase;
+}
+
+.cursor-active .cursor {
+  transform: scale(1.4);
+}
+
+/* Magnetic text */
+.magnetic {
+  font-size: 4rem;
+  display: inline-block;
+  margin: 120px;
+  cursor: pointer;
+}
+
+/* Hover image */
+.hover-image {
+  position: fixed;
+  width: 250px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 999;
+  border-radius: 12px;
+}
+
+/* Noise svg */
+.noise {
+  position: absolute;
+  width: 0;
+  height: 0;
 }
