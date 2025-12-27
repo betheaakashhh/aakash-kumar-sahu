@@ -66,10 +66,10 @@ const MainHeroSection = () => {
         <div className="gradient-sphere sphere-2"></div>
         <div className="gradient-sphere sphere-3"></div>
         <div className="floating-particles">
-          {[...Array(20)].map((_, i) => (
+          {[...Array(1200)].map((_, i) => (
             <div key={i} className="particle" style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
+              left: `${Math.random() * 1000}%`,
+              animationDelay: `${Math.random() * 1}s`,
               animationDuration: `${15 + Math.random() * 10}s`
             }}></div>
           ))}
