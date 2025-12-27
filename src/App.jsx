@@ -41,8 +41,7 @@ function App() {
       {/* Custom Cursor */}
       <Cursor />
 
-      {/* Notifications */}
-      <UpdateNotification />
+      
 
       <Routes>
 

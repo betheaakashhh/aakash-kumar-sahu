@@ -8,9 +8,11 @@ import HashTag from '../Hashtag/HashTag'
 import ScrollingShowcase from '../../Components/ScollingText/ScrollingShowcase'
 import DailyCodeChallenge from '../ChallengeSection/DailyCodeChallenge'
 import SearchSection from '../SearchSection/SearchSection'
+import UpdateNotification from '../../Components/UpdateInfo/UpdateNotification'
 const Home = () => {
   return (
     <div>
+        <UpdateNotification />
         <Navbar />
         <MainHeroSection />
         <ImageHeroSection />

@@ -84,7 +84,7 @@ const MainHeroSection = () => {
           ))}
         </div>
         <div className="floating-particles">
-          {[...Array(800)].map((_, i) => (
+          {[...Array(100)].map((_, i) => (
             <div key={i} className="particle" style={{
               left: `${Math.random() * 100}%`,
               right: `${Math.random() * 100}%`,
