@@ -476,7 +476,7 @@ const About = () => {
                         width: '100%',
                         minHeight: '100vh',
                         padding: '80px 20px 40px',
-                        background: '#000'
+                        background: 'transparent'
                       }}
                     >
                       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -713,7 +713,7 @@ const About = () => {
                         onClick={(e) => e.stopPropagation()}
                         style={{
                           maxWidth: '900px',
-                          margin: '40px auto',
+                          margin: '90px auto',
                           background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
                           border: '2px solid rgba(0, 255, 255, 0.3)',
                           borderRadius: '20px',

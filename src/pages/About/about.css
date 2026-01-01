@@ -91,6 +91,8 @@ background: -webkit-linear-gradient(360deg, hsla(0, 0%, 8%, 1) 0%, hsla(240, 5%,
 .as-abt-circle-3 {
   position: absolute;
   border-radius: 50%;
+  filter: blur(0.8px);
+
   
 
 }
