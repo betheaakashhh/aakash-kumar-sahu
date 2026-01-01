@@ -91,7 +91,8 @@ background: -webkit-linear-gradient(360deg, hsla(0, 0%, 8%, 1) 0%, hsla(240, 5%,
 .as-abt-circle-3 {
   position: absolute;
   border-radius: 50%;
-  border: 2px solid rgba(32, 32, 32, 0.2);
+  
+
 }
 
 .as-abt-circle-1 {
@@ -99,6 +100,7 @@ background: -webkit-linear-gradient(360deg, hsla(0, 0%, 8%, 1) 0%, hsla(240, 5%,
   height: 300px;
   top: -150px;
   left: -150px;
+  background: rgba(0, 255, 255, 0.1);
   animation: as-abt-float 8s ease-in-out infinite;
 }
 
@@ -107,8 +109,9 @@ background: -webkit-linear-gradient(360deg, hsla(0, 0%, 8%, 1) 0%, hsla(240, 5%,
   height: 500px;
   top: -250px;
   left: -250px;
+  background: rgba(8, 58, 112, 0.1);
   animation: as-abt-float 12s ease-in-out infinite reverse;
-  border-color: rgba(8, 58, 112, 0.62);
+  
 }
 
 .as-abt-circle-3 {
@@ -116,8 +119,9 @@ background: -webkit-linear-gradient(360deg, hsla(0, 0%, 8%, 1) 0%, hsla(240, 5%,
   height: 700px;
   top: -350px;
   left: -350px;
+  background: rgba(0, 255, 255, 0.05);
   animation: as-abt-float 15s ease-in-out infinite;
-  border-color: rgba(0, 255, 255, 0.1);
+  
 }
 
 @keyframes as-abt-float {
