@@ -454,7 +454,7 @@ const About = () => {
             <div style={{ 
                 width: '100%', 
                 minHeight: '100vh', 
-                background: '#000',
+                background: 'transparent',
                 color: '#fff',
                 overflow: selectedItem ? 'hidden' : 'auto',
                 position: 'relative'
